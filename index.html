@@ -13,31 +13,37 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
   <div class="max-w-7xl mx-auto space-y-6">
     
-    <!-- Encabezado -->
+    <!-- Header -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
       <div>
         <div class="flex items-center gap-3">
           <span class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white">Incidencias de Flotilla — Chazky</h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Panel interactivo conectado en tiempo real</p>
+        <p class="text-slate-400 text-sm mt-1">Panel consolidado de Guías y Drivers</p>
       </div>
       
       <!-- Buscador y Filtros -->
       <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" oninput="filterData()" placeholder="Buscar por guía, driver..." 
+        <input type="text" id="searchInput" oninput="filterData()" placeholder="Buscar por guía, driver, almacén..." 
                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+        <select id="almacenFilter" onchange="filterData()" 
+                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+          <option value="">Todos los almacenes</option>
+          <option value="Toreo">Toreo</option>
+          <option value="Sur">Sur</option>
+        </select>
         <select id="typeFilter" onchange="filterData()" 
                 class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
-          <option value="">Todos los tipos de incidencia</option>
+          <option value="">Todos los tipos</option>
         </select>
       </div>
     </header>
 
-    <!-- Métricas (KPIs) -->
+    <!-- KPIs -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
-        <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total de Registros</span>
+        <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Incidencias</span>
         <div id="totalKpi" class="text-3xl font-bold text-white mt-1">-</div>
       </div>
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
@@ -46,63 +52,86 @@
       </div>
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
         <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Estado de Conexión</span>
-        <div id="statusKpi" class="text-base font-semibold text-emerald-400 mt-2">● Conectado a Google Sheet</div>
+        <div id="statusKpi" class="text-base font-semibold text-emerald-400 mt-2">● Vinculando pestañas...</div>
       </div>
     </div>
 
-    <!-- Rejilla de Tarjetas -->
+    <!-- Rejilla -->
     <main id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="col-span-full text-center py-12 text-slate-500">Cargando datos directamente desde Google Sheets...</div>
+      <div class="col-span-full text-center py-12 text-slate-500">Cargando y vinculando datos de "Guias" y "DRIVERS"...</div>
     </main>
   </div>
 
   <script>
     const SPREADSHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
-    const GID = '1995934926'; // ID de tu pestaña exacta
 
-    let rawIncidents = [];
+    let guiasData = [];
+    let driversMap = {}; // Mapa para almacenar Driver/Guía -> Almacén
+    let mergedIncidents = [];
 
-    // Manejador global de la respuesta de Google
-    window.handleGoogleData = function(response) {
-      if (!response.table || !response.table.rows) {
-        showError('No se recibieron datos de la pestaña especificada.');
-        return;
+    // 1. Carga de datos de la pestaña Guias
+    window.handleGuiasData = function(response) {
+      if (response.table && response.table.rows) {
+        guiasData = response.table.rows.map(r => {
+          const c = r.c || [];
+          return {
+            guia: c[0] ? (c[0].v !== null ? c[0].v : c[0].f) : 'N/A',
+            driver: c[1] ? (c[1].v !== null ? c[1].v : c[1].f) : 'Sin asignar',
+            fecha: c[2] ? (c[2].f || c[2].v) : 'N/A',
+            descripcion: c[3] ? (c[3].v !== null ? c[3].v : c[3].f) : 'Sin comentarios',
+            tipo: c[4] ? (c[4].v !== null ? c[4].v : c[4].f) : 'Incidencia General'
+          };
+        }).filter(item => item.guia && item.guia !== 'N/A' && item.guia !== 'Guía' && item.guia !== 'GUIA');
       }
-
-      const rows = response.table.rows;
-      rawIncidents = rows.map(r => {
-        const c = r.c || [];
-        return {
-          guia: c[0] ? (c[0].v !== null ? c[0].v : c[0].f) : 'N/A',
-          driver: c[1] ? (c[1].v !== null ? c[1].v : c[1].f) : 'Sin asignar',
-          fecha: c[2] ? (c[2].f || c[2].v) : 'N/A',
-          descripcion: c[3] ? (c[3].v !== null ? c[3].v : c[3].f) : 'Sin comentarios',
-          tipo: c[4] ? (c[4].v !== null ? c[4].v : c[4].f) : 'Incidencia General'
-        };
-      }).filter(item => item.guia && item.guia !== 'N/A' && item.guia !== 'Guía' && item.guia !== 'GUIA');
-
-      if (rawIncidents.length === 0) {
-        showError('La pestaña está vacía o no tiene registros de incidencias válidos.');
-        return;
-      }
-
-      populateTypeDropdown();
-      renderCards(rawIncidents);
-      updateKPIs(rawIncidents);
+      checkAndMerge();
     };
 
-    function initDataFetch() {
-      const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}&tqx=responseHandler:handleGoogleData`;
-      script.onerror = () => showError('Error al conectar con Google Sheets. Verifica que el archivo esté publicado o compartido públicamente.');
-      document.body.appendChild(script);
+    // 2. Carga de datos de la pestaña DRIVERS (Nombre + Almacén)
+    window.handleDriversData = function(response) {
+      if (response.table && response.table.rows) {
+        response.table.rows.forEach(r => {
+          const c = r.c || [];
+          const keyName = c[0] ? String(c[0].v || c[0].f || '').trim().toLowerCase() : '';
+          const almacen = c[1] ? String(c[1].v || c[1].f || '').trim() : '';
+
+          if (keyName) {
+            driversMap[keyName] = almacen;
+          }
+        });
+      }
+      checkAndMerge();
+    };
+
+    // 3. Cruzar la información
+    function checkAndMerge() {
+      if (guiasData.length > 0) {
+        mergedIncidents = guiasData.map(item => {
+          const driverKey = String(item.driver).trim().toLowerCase();
+          const guiaKey = String(item.guia).trim().toLowerCase();
+          
+          // Busca el almacén asociándolo al Driver o a la Guía
+          const almacen = driversMap[driverKey] || driversMap[guiaKey] || 'No especificado';
+
+          return { ...item, almacen };
+        });
+
+        document.getElementById('statusKpi').textContent = '● Conectado (Guias + DRIVERS)';
+        populateTypeDropdown();
+        renderCards(mergedIncidents);
+        updateKPIs(mergedIncidents);
+      }
     }
 
-    function showError(msg) {
-      document.getElementById('cardsGrid').innerHTML = `
-        <div class="col-span-full bg-red-950/30 border border-red-800/50 p-6 rounded-xl text-red-400 text-center">
-          ${msg}
-        </div>`;
+    function initMultiFetch() {
+      // Pedir pestaña Guias
+      const s1 = document.createElement('script');
+      s1.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=Guias&tqx=responseHandler:handleGuiasData`;
+      document.body.appendChild(s1);
+
+      // Pedir pestaña DRIVERS
+      const s2 = document.createElement('script');
+      s2.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=DRIVERS&tqx=responseHandler:handleDriversData`;
+      document.body.appendChild(s2);
     }
 
     function renderCards(items) {
@@ -122,9 +151,20 @@
               <span class="text-xs text-slate-500 font-mono">${item.fecha}</span>
             </div>
 
-            <div>
-              <span class="text-[10px] font-bold text-slate-500 tracking-wider uppercase">Número de Guía</span>
-              <p class="text-lg font-bold text-slate-100 font-mono tracking-wide">${item.guia}</p>
+            <div class="flex justify-between items-end">
+              <div>
+                <span class="text-[10px] font-bold text-slate-500 tracking-wider uppercase">Número de Guía</span>
+                <p class="text-lg font-bold text-slate-100 font-mono tracking-wide">${item.guia}</p>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[11px] font-semibold ${
+                item.almacen.toLowerCase().includes('toreo') 
+                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' 
+                  : item.almacen.toLowerCase().includes('sur') 
+                  ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' 
+                  : 'bg-slate-800 text-slate-400'
+              }">
+                📍 ${item.almacen}
+              </span>
             </div>
 
             <div class="flex items-center gap-2 pt-1">
@@ -144,9 +184,9 @@
     }
 
     function populateTypeDropdown() {
-      const types = [...new Set(rawIncidents.map(i => i.tipo))].filter(Boolean);
+      const types = [...new Set(mergedIncidents.map(i => i.tipo))].filter(Boolean);
       const select = document.getElementById('typeFilter');
-      select.innerHTML = '<option value="">Todos los tipos de incidencia</option>';
+      select.innerHTML = '<option value="">Todos los tipos</option>';
       types.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t;
@@ -158,13 +198,16 @@
     function filterData() {
       const query = document.getElementById('searchInput').value.toLowerCase();
       const selectedType = document.getElementById('typeFilter').value;
+      const selectedAlmacen = document.getElementById('almacenFilter').value.toLowerCase();
 
-      const filtered = rawIncidents.filter(item => {
+      const filtered = mergedIncidents.filter(item => {
         const matchesQuery = String(item.guia).toLowerCase().includes(query) || 
                              String(item.driver).toLowerCase().includes(query) ||
-                             String(item.descripcion).toLowerCase().includes(query);
+                             String(item.descripcion).toLowerCase().includes(query) ||
+                             String(item.almacen).toLowerCase().includes(query);
         const matchesType = !selectedType || item.tipo === selectedType;
-        return matchesQuery && matchesType;
+        const matchesAlmacen = !selectedAlmacen || item.almacen.toLowerCase().includes(selectedAlmacen);
+        return matchesQuery && matchesType && matchesAlmacen;
       });
 
       renderCards(filtered);
@@ -177,7 +220,7 @@
       document.getElementById('driversKpi').textContent = uniqueDrivers;
     }
 
-    initDataFetch();
+    initMultiFetch();
   </script>
 </body>
 </html>
