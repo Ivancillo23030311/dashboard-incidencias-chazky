@@ -44,9 +44,8 @@
 
   <div class="max-w-7xl mx-auto space-y-6">
 
-    <!-- BARRA SUPERIOR / CONTROL TOWER HEADER -->
+    <!-- HEADER / BARRA SUPERIOR -->
     <header class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 md:p-6 backdrop-blur-xl relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 glow-box">
-      <!-- Luz ambiental superior -->
       <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-30 transition-all duration-500" id="ambientGlow" style="background-color: var(--neon-primary)"></div>
 
       <div class="relative z-10">
@@ -68,21 +67,18 @@
         </div>
       </div>
 
-      <!-- BUSCADOR & PERSONALIZADOR DE COLOR -->
+      <!-- CONTROLES Y TEMAS -->
       <div class="relative z-10 flex flex-wrap items-center gap-3">
-        
-        <!-- Palette Selector Ampliado -->
         <div class="bg-slate-950/90 p-2 border border-slate-800 rounded-2xl flex items-center gap-2">
           <span class="text-[10px] font-bold text-slate-500 uppercase px-1 font-tech">TEMAS:</span>
-          <button onclick="changeTheme('warm')" class="w-6 h-6 rounded-full bg-gradient-to-r from-red-500 to-amber-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Warm Neon / Fuego"></button>
-          <button onclick="changeTheme('cyber')" class="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Cyber Lime / Verde"></button>
-          <button onclick="changeTheme('fuchsia')" class="w-6 h-6 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Pink / Rosa"></button>
-          <button onclick="changeTheme('electric')" class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Blue / Azul"></button>
-          <button onclick="changeTheme('toxic')" class="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-300 to-lime-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Toxic Gold / Neón Gold"></button>
-          <button onclick="changeTheme('purple')" class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 border-2 border-white/20 hover:scale-125 transition-transform" title="Deep Purple / Violeta"></button>
+          <button onclick="changeTheme('warm')" class="w-6 h-6 rounded-full bg-gradient-to-r from-red-500 to-amber-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Warm Neon"></button>
+          <button onclick="changeTheme('cyber')" class="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Cyber Lime"></button>
+          <button onclick="changeTheme('fuchsia')" class="w-6 h-6 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Pink"></button>
+          <button onclick="changeTheme('electric')" class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Blue"></button>
+          <button onclick="changeTheme('toxic')" class="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-300 to-lime-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Toxic Gold"></button>
+          <button onclick="changeTheme('purple')" class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 border-2 border-white/20 hover:scale-125 transition-transform" title="Deep Purple"></button>
         </div>
 
-        <!-- Inputs de Filtro -->
         <input type="text" id="searchInput" oninput="filterData()" placeholder="🔍 Buscar guía o driver..." 
                class="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 w-full sm:w-44">
         
@@ -93,7 +89,7 @@
       </div>
     </header>
 
-    <!-- METRICAS / KPIS FLOTANTES -->
+    <!-- KPIS -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
         <div class="flex justify-between items-center">
@@ -123,10 +119,8 @@
       </div>
     </div>
 
-    <!-- SECCIÓN DE GRÁFICAS DE PASTEL NEÓN -->
+    <!-- GRÁFICAS -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Chart 1: Almacenes -->
       <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
@@ -140,7 +134,6 @@
         </div>
       </div>
 
-      <!-- Chart 2: Tipos de Incidencias -->
       <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
@@ -153,10 +146,9 @@
           <canvas id="chartTipo"></canvas>
         </div>
       </div>
-
     </div>
 
-    <!-- TABLA DE MONITOREO DE PAQUETERÍA / GUÍAS -->
+    <!-- TABLA -->
     <div class="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
       <div class="p-5 border-b border-slate-800 flex items-center justify-between">
         <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-200 flex items-center gap-2">
@@ -193,38 +185,13 @@
     let chartAlmacenInstance = null;
     let chartTipoInstance = null;
 
-    // 6 Paletas de colores fosforescentes / neón
     const colorPalettes = {
-      warm: {
-        primary: '#ff0055',
-        secondary: '#ffaa00',
-        colors: ['#ff0055', '#ffaa00', '#ccff00', '#ff3300', '#ff00aa', '#ffdd00']
-      },
-      cyber: {
-        primary: '#10b981',
-        secondary: '#06b6d4',
-        colors: ['#10b981', '#06b6d4', '#84cc16', '#3b82f6', '#a855f7', '#22c55e']
-      },
-      fuchsia: {
-        primary: '#d946ef',
-        secondary: '#ec4899',
-        colors: ['#d946ef', '#ec4899', '#f43f5e', '#8b5cf6', '#a855f7', '#fb7185']
-      },
-      electric: {
-        primary: '#3b82f6',
-        secondary: '#06b6d4',
-        colors: ['#3b82f6', '#06b6d4', '#6366f1', '#60a5fa', '#38bdf8', '#818cf8']
-      },
-      toxic: {
-        primary: '#facc15',
-        secondary: '#84cc16',
-        colors: ['#facc15', '#84cc16', '#10b981', '#f59e0b', '#eab308', '#06b6d4']
-      },
-      purple: {
-        primary: '#a855f7',
-        secondary: '#6366f1',
-        colors: ['#a855f7', '#6366f1', '#ec4899', '#8b5cf6', '#d946ef', '#3b82f6']
-      }
+      warm: { primary: '#ff0055', secondary: '#ffaa00', colors: ['#ff0055', '#ffaa00', '#ccff00', '#ff3300', '#ff00aa', '#ffdd00'] },
+      cyber: { primary: '#10b981', secondary: '#06b6d4', colors: ['#10b981', '#06b6d4', '#84cc16', '#3b82f6', '#a855f7', '#22c55e'] },
+      fuchsia: { primary: '#d946ef', secondary: '#ec4899', colors: ['#d946ef', '#ec4899', '#f43f5e', '#8b5cf6', '#a855f7', '#fb7185'] },
+      electric: { primary: '#3b82f6', secondary: '#06b6d4', colors: ['#3b82f6', '#06b6d4', '#6366f1', '#60a5fa', '#38bdf8', '#818cf8'] },
+      toxic: { primary: '#facc15', secondary: '#84cc16', colors: ['#facc15', '#84cc16', '#10b981', '#f59e0b', '#eab308', '#06b6d4'] },
+      purple: { primary: '#a855f7', secondary: '#6366f1', colors: ['#a855f7', '#6366f1', '#ec4899', '#8b5cf6', '#d946ef', '#3b82f6'] }
     };
 
     let currentTheme = 'warm';
@@ -242,15 +209,14 @@
       updateCharts();
     }
 
-    // Normalizador estricto de textos para emparejar nombres con o sin acentos/espacios
     function cleanText(str) {
       if (!str) return '';
       return str.toString()
         .toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
-        .replace(/[^a-z0-9 ]/g, '') // quita caracteres especiales
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9 ]/g, ' ')
         .trim()
-        .replace(/\s+/g, ' '); // reduce espacios múltiples
+        .replace(/\s+/g, ' ');
     }
 
     function parseCSV(text) {
@@ -272,6 +238,32 @@
       }).filter(row => row.some(cell => cell !== ''));
     }
 
+    // Algoritmo Inteligente de Coincidencia de Nombres (Fuzzy Word Match)
+    function matchDriverAlmacen(driverRawName, driversList) {
+      const targetClean = cleanText(driverRawName);
+      if (!targetClean || targetClean === 'sin asignar') return 'SIN ASIGNAR';
+
+      const targetWords = targetClean.split(' ').filter(w => w.length > 2);
+
+      for (let item of driversList) {
+        const itemClean = item.cleanName;
+        // 1. Coincidencia Exacta
+        if (targetClean === itemClean || targetClean.includes(itemClean) || itemClean.includes(targetClean)) {
+          return item.almacen;
+        }
+
+        // 2. Coincidencia por palabras compartidas (al menos 2 palabras iguales, ej: "Gabriela" y "Duran")
+        const itemWords = itemClean.split(' ').filter(w => w.length > 2);
+        const sharedWords = targetWords.filter(w => itemWords.includes(w));
+
+        if (sharedWords.length >= 2 || (targetWords.length === 1 && sharedWords.length === 1)) {
+          return item.almacen;
+        }
+      }
+
+      return 'PENDIENTE DE ASIGNAR';
+    }
+
     async function loadAllData() {
       try {
         const urlGuias = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=Guias`;
@@ -285,29 +277,27 @@
         const rowsGuias = parseCSV(resGuias);
         const rowsDrivers = parseCSV(resDrivers);
 
-        // Mapeo exhaustivo de Drivers a Almacén
-        const driversMap = {};
+        // Extraer lista de drivers dinámicamente escaneando todas las columnas
+        const driversList = [];
         rowsDrivers.forEach((row) => {
-          const rawDriverName = row[0] ? row[0].trim() : '';
-          const cleanedDriverName = cleanText(rawDriverName);
-          
-          // Buscar si hay mención de almacén en cualquier celda de la fila
-          let almacenEncontrado = '';
+          let driverName = '';
+          let almacenName = '';
+
           row.forEach(cell => {
             const cellClean = cleanText(cell);
-            if (cellClean.includes('toreo')) almacenEncontrado = 'TOREO';
-            else if (cellClean.includes('sur')) almacenEncontrado = 'SUR';
+            if (cellClean.includes('toreo')) almacenName = 'TOREO';
+            else if (cellClean.includes('sur')) almacenName = 'SUR';
+            else if (cell.trim().length > 3 && !cellClean.includes('drivers no auditados') && !cellClean.includes('almacen')) {
+              driverName = cell.trim();
+            }
           });
 
-          if (!almacenEncontrado && row[1]) {
-            const c1 = cleanText(row[1]);
-            if (c1.includes('toreo')) almacenEncontrado = 'TOREO';
-            else if (c1.includes('sur')) almacenEncontrado = 'SUR';
-            else if (c1.length > 0) almacenEncontrado = row[1].toUpperCase();
-          }
-
-          if (cleanedDriverName) {
-            driversMap[cleanedDriverName] = almacenEncontrado || 'SIN ASIGNAR';
+          if (driverName && almacenName) {
+            driversList.push({
+              rawName: driverName,
+              cleanName: cleanText(driverName),
+              almacen: almacenName
+            });
           }
         });
 
@@ -325,19 +315,8 @@
                           guia.length > 30;
 
           if (guia && !isTrash) {
-            const cleanedDriverKey = cleanText(driverRaw);
-            
-            // Intento 1: Coincidencia exacta
-            let almacenFound = driversMap[cleanedDriverKey];
+            const almacenFinal = matchDriverAlmacen(driverRaw, driversList);
 
-            // Intento 2: Coincidencia parcial si no se encontró
-            if (!almacenFound) {
-              const driverKeys = Object.keys(driversMap);
-              const partialMatchKey = driverKeys.find(key => key.includes(cleanedDriverKey) || cleanedDriverKey.includes(key));
-              if (partialMatchKey) almacenFound = driversMap[partialMatchKey];
-            }
-
-            const almacenFinal = almacenFound || 'PENDIENTE DE ASIGNAR';
             mergedIncidents.push({ 
               guia, 
               driver: driverRaw || 'Sin Asignar', 
@@ -378,16 +357,19 @@
     function renderTable(items) {
       const tbody = document.getElementById('guiasTableBody');
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No se encontraron resultados para los filtros seleccionados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No se encontraron resultados.</td></tr>`;
         return;
       }
 
       let html = '';
       items.forEach((item, index) => {
         const isPendiente = item.almacen === 'PENDIENTE DE ASIGNAR';
+        const isToreo = item.almacen === 'TOREO';
         const badgeClass = isPendiente 
           ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' 
-          : 'bg-slate-800 text-slate-300 border-slate-700';
+          : isToreo
+          ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
+          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
 
         html += `
           <tr onclick="toggleRow(${index})" class="hover:bg-slate-800/50 cursor-pointer transition-colors group">
@@ -442,7 +424,6 @@
 
       const palette = colorPalettes[currentTheme].colors;
 
-      // Chart 1: Almacén
       const almacenCounts = {};
       mergedIncidents.forEach(i => {
         almacenCounts[i.almacen] = (almacenCounts[i.almacen] || 0) + 1;
@@ -473,7 +454,6 @@
         }
       });
 
-      // Chart 2: Tipo de falla
       const tipoCounts = {};
       mergedIncidents.forEach(i => {
         tipoCounts[i.tipo] = (tipoCounts[i.tipo] || 0) + 1;
