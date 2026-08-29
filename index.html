@@ -318,37 +318,35 @@
 
         mergedIncidents = [];
         rowsGuias.forEach((row, rowIndex) => {
-          if (rowIndex === 0) return; // Omitir encabezados
+          // Omitir fila 0 (encabezados)
+          if (rowIndex === 0) return;
 
           const guia = row[0] ? row[0].trim() : '';
           const driverRaw = row[1] ? row[1].trim() : 'Sin Asignar';
           const fecha = row[2] ? row[2].trim() : 'N/A';
 
-          // Búsqueda dinámica del Tipo de Incidencia según el patrón desplegable
+          // EXTRACCIÓN PRECISA DEL DESPLEGABLE DE INCIDENCIAS
           let tipoFinal = '';
-          
-          for (let i = row.length - 1; i >= 3; i--) {
+
+          // 1. Priorizamos buscar el valor exacto seleccionado en el menú desplegable (columnas D, E, F)
+          for (let i = 3; i < row.length; i++) {
             const val = row[i] ? row[i].trim() : '';
             const valClean = cleanText(val);
 
+            // Filtrar explícitamente palabras de títulos/encabezados de la hoja
             if (
-              valClean.includes('terceros') || 
-              valClean.includes('evidencia') || 
-              valClean.includes('autorizacion') ||
-              valClean.includes('entrega')
+              valClean.includes('criterio') || 
+              valClean.includes('general') || 
+              valClean.includes('tipo de incidencia') ||
+              valClean === 'incidencia'
             ) {
+              continue;
+            }
+
+            // Detectar texto real del desplegable
+            if (val.length > 0) {
               tipoFinal = val;
               break;
-            }
-          }
-
-          // Si no hace match por palabras clave, toma la última columna no vacía de la fila
-          if (!tipoFinal) {
-            for (let i = row.length - 1; i >= 3; i--) {
-              if (row[i] && row[i].trim().length > 0) {
-                tipoFinal = row[i].trim();
-                break;
-              }
             }
           }
 
@@ -356,6 +354,7 @@
 
           const isTrash = cleanText(guia).includes('guia') || 
                           cleanText(guia).includes('mensaje whatsapp') || 
+                          cleanText(guia).includes('criterios fallidos') ||
                           guia.length > 30;
 
           if (guia && !isTrash) {
