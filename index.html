@@ -13,14 +13,14 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
   <div class="max-w-7xl mx-auto space-y-6">
     
-    <!-- Header principal -->
+    <!-- Encabezado -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
       <div>
         <div class="flex items-center gap-3">
           <span class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white">Incidencias de Flotilla — Chazky</h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Panel interactivo en tiempo real</p>
+        <p class="text-slate-400 text-sm mt-1">Panel interactivo conectado en tiempo real</p>
       </div>
       
       <!-- Buscador y Filtros -->
@@ -34,7 +34,7 @@
       </div>
     </header>
 
-    <!-- Métricas Rápidas (KPIs) -->
+    <!-- Métricas (KPIs) -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
         <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total de Registros</span>
@@ -50,21 +50,22 @@
       </div>
     </div>
 
-    <!-- Feed de Tarjetas Tipo Lovable -->
+    <!-- Rejilla de Tarjetas -->
     <main id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="col-span-full text-center py-12 text-slate-500">Cargando incidencias de Google Sheets...</div>
+      <div class="col-span-full text-center py-12 text-slate-500">Cargando datos directamente desde Google Sheets...</div>
     </main>
   </div>
 
   <script>
-    const SHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
-    const SHEET_NAME = 'Guias'; 
+    const SPREADSHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
+    const GID = '1995934926'; // ID de tu pestaña exacta
 
     let rawIncidents = [];
 
-    window.handleSheetResponse = function(response) {
-      if (!response.table || !response.table.rows || response.table.rows.length === 0) {
-        showError('La pestaña especificada no contiene datos.');
+    // Manejador global de la respuesta de Google
+    window.handleGoogleData = function(response) {
+      if (!response.table || !response.table.rows) {
+        showError('No se recibieron datos de la pestaña especificada.');
         return;
       }
 
@@ -81,7 +82,7 @@
       }).filter(item => item.guia && item.guia !== 'N/A' && item.guia !== 'Guía' && item.guia !== 'GUIA');
 
       if (rawIncidents.length === 0) {
-        showError('No se encontraron registros activos en la tabla.');
+        showError('La pestaña está vacía o no tiene registros de incidencias válidos.');
         return;
       }
 
@@ -90,10 +91,10 @@
       updateKPIs(rawIncidents);
     };
 
-    function loadSheetData() {
+    function initDataFetch() {
       const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=responseHandler:handleSheetResponse`;
-      script.onerror = () => showError('Error de conexión con Google Sheets. Verifica el acceso público.');
+      script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}&tqx=responseHandler:handleGoogleData`;
+      script.onerror = () => showError('Error al conectar con Google Sheets. Verifica que el archivo esté publicado o compartido públicamente.');
       document.body.appendChild(script);
     }
 
@@ -176,7 +177,7 @@
       document.getElementById('driversKpi').textContent = uniqueDrivers;
     }
 
-    loadSheetData();
+    initDataFetch();
   </script>
 </body>
 </html>
