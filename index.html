@@ -66,7 +66,7 @@
         </div>
       </div>
 
-      <!-- CONTROLES Y TEMAS -->
+      <!-- CONTROLES Y FILTROS -->
       <div class="relative z-10 flex flex-wrap items-center gap-3">
         <div class="bg-slate-950/90 p-2 border border-slate-800 rounded-2xl flex items-center gap-2">
           <span class="text-[10px] font-bold text-slate-500 uppercase px-1 font-tech">TEMAS:</span>
@@ -85,6 +85,11 @@
                 class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none">
           <option value="">Todos los Almacenes</option>
         </select>
+
+        <select id="tipoFilter" onchange="filterData()" 
+                class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none">
+          <option value="">Todas las Incidencias</option>
+        </select>
       </div>
     </header>
 
@@ -101,11 +106,11 @@
 
       <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
         <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Drivers con Reporte</span>
+          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Drivers Involucrados</span>
           <span class="text-xl">👷🏻‍♂️</span>
         </div>
         <div id="driversKpi" class="text-4xl font-extrabold font-tech neon-text-secondary mt-2">-</div>
-        <p class="text-[10px] text-slate-500 mt-1">Repartidores involucrados</p>
+        <p class="text-[10px] text-slate-500 mt-1">Repartidores con reporte</p>
       </div>
 
       <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
@@ -137,7 +142,7 @@
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            Tipos de Fallas / Criterios
+            Tipos de Incidencias
           </h3>
           <span class="text-xs text-slate-500 font-tech">PASTEL NEÓN</span>
         </div>
@@ -147,13 +152,12 @@
       </div>
     </div>
 
-    <!-- TABLA -->
+    <!-- TABLA RESTRUCTURADA -->
     <div class="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
       <div class="p-5 border-b border-slate-800 flex items-center justify-between">
         <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-200 flex items-center gap-2">
-          <span>🏷️</span> Detalle Operativo de Guías
+          <span>🏷️</span> Registro Clasificado de Incidencias
         </h3>
-        <span class="text-xs text-slate-500">Haz clic en cualquier fila para expandir comentarios</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -163,8 +167,8 @@
               <th class="py-3.5 px-5">Código de Guía</th>
               <th class="py-3.5 px-5">Driver / Asignado</th>
               <th class="py-3.5 px-5">Almacén HUB</th>
-              <th class="py-3.5 px-5">Fecha</th>
-              <th class="py-3.5 px-5 text-right">Acción</th>
+              <th class="py-3.5 px-5">Tipo de Incidencia</th>
+              <th class="py-3.5 px-5 text-right">Fecha</th>
             </tr>
           </thead>
           <tbody id="guiasTableBody" class="divide-y divide-slate-800/40 text-xs text-slate-300">
@@ -237,21 +241,18 @@
       }).filter(row => row.some(cell => cell !== ''));
     }
 
-    // ALGORITMO FLEXIBLE DE COINCIDENCIAS
     function matchDriverAlmacen(driverRawName, driversList) {
       const targetClean = cleanText(driverRawName);
       if (!targetClean || targetClean === 'sin asignar') return 'SIN ASIGNAR';
 
       const targetWords = targetClean.split(' ').filter(w => w.length >= 3);
 
-      // 1. Coincidencia directa o contenedora
       for (let item of driversList) {
         if (targetClean === item.cleanName || targetClean.includes(item.cleanName) || item.cleanName.includes(targetClean)) {
           return item.almacen;
         }
       }
 
-      // 2. Coincidencia por palabras clave compartidas
       let bestMatch = null;
       let maxScore = 0;
 
@@ -292,7 +293,6 @@
         const rowsGuias = parseCSV(resGuias);
         const rowsDrivers = parseCSV(resDrivers);
 
-        // Mapeo exhaustivo de drivers
         const driversList = [];
         rowsDrivers.forEach((row) => {
           let driverName = '';
@@ -316,14 +316,13 @@
           }
         });
 
-        // Filtrado y cruce de incidencias
         mergedIncidents = [];
         rowsGuias.forEach((row) => {
           const guia = row[0] ? row[0].trim() : '';
           const driverRaw = row[1] ? row[1].trim() : 'Sin Asignar';
           const fecha = row[2] ? row[2].trim() : 'N/A';
-          const descripcion = row[3] ? row[3].trim() : 'Sin comentarios';
-          const tipo = row[4] ? row[4].trim() : 'Incidencia General';
+          // Tomamos directamente la columna de la incidencia (Columna E / índice 4 o D / índice 3)
+          const tipo = row[4] && row[4].trim() ? row[4].trim() : (row[3] ? row[3].trim() : 'Sin Clasificar');
 
           const isTrash = cleanText(guia).includes('guia') || 
                           cleanText(guia).includes('mensaje whatsapp') || 
@@ -336,7 +335,6 @@
               guia, 
               driver: driverRaw || 'Sin Asignar', 
               fecha, 
-              descripcion, 
               tipo, 
               almacen: almacenFinal 
             });
@@ -377,7 +375,7 @@
       }
 
       let html = '';
-      items.forEach((item, index) => {
+      items.forEach((item) => {
         const isPendiente = item.almacen === 'PENDIENTE DE ASIGNAR';
         const isToreo = item.almacen === 'TOREO';
         const badgeClass = isPendiente 
@@ -387,8 +385,8 @@
           : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
 
         html += `
-          <tr onclick="toggleRow(${index})" class="hover:bg-slate-800/50 cursor-pointer transition-colors group">
-            <td class="py-3.5 px-5 font-mono font-bold text-white group-hover:text-amber-400 flex items-center gap-2">
+          <tr class="hover:bg-slate-800/50 transition-colors">
+            <td class="py-3.5 px-5 font-mono font-bold text-white flex items-center gap-2">
               <span class="text-slate-600 font-normal">#</span>${item.guia}
             </td>
             <td class="py-3.5 px-5 font-medium text-slate-200">
@@ -399,39 +397,19 @@
                 📍 ${item.almacen}
               </span>
             </td>
-            <td class="py-3.5 px-5 font-mono text-slate-400 text-[11px]">
+            <td class="py-3.5 px-5">
+              <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+                ⚠️ ${item.tipo}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 text-right font-mono text-slate-400 text-[11px]">
               ${item.fecha}
-            </td>
-            <td class="py-3.5 px-5 text-right font-tech text-[11px] text-slate-400 group-hover:text-white">
-              ▼ DESPLEGAR
-            </td>
-          </tr>
-
-          <tr id="detail-${index}" class="hidden bg-slate-950/90">
-            <td colspan="5" class="p-5 border-t border-b border-slate-800/80">
-              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                <div class="flex items-center justify-between text-xs font-tech">
-                  <span class="text-slate-400">TIPO DE ANOMALÍA: <strong class="text-red-400">${item.tipo}</strong></span>
-                  <span class="text-slate-500">CÓDIGO GUÍA: ${item.guia}</span>
-                </div>
-                <div>
-                  <span class="text-[10px] font-bold uppercase font-tech text-slate-500 block mb-1">REPORTE / COMENTARIOS:</span>
-                  <p class="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800/80 whitespace-pre-line font-mono">
-                    ${item.descripcion}
-                  </p>
-                </div>
-              </div>
             </td>
           </tr>
         `;
       });
 
       tbody.innerHTML = html;
-    }
-
-    function toggleRow(index) {
-      const detail = document.getElementById(`detail-${index}`);
-      detail.classList.toggle('hidden');
     }
 
     function updateCharts() {
@@ -510,18 +488,29 @@
         opt.textContent = a;
         selectAlmacen.appendChild(opt);
       });
+
+      const tipos = [...new Set(mergedIncidents.map(i => i.tipo))].filter(Boolean);
+      const selectTipo = document.getElementById('tipoFilter');
+      selectTipo.innerHTML = '<option value="">Todas las Incidencias</option>';
+      tipos.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        selectTipo.appendChild(opt);
+      });
     }
 
     function filterData() {
       const query = cleanText(document.getElementById('searchInput').value);
       const selectedAlmacen = document.getElementById('almacenFilter').value;
+      const selectedTipo = document.getElementById('tipoFilter').value;
 
       const filtered = mergedIncidents.filter(item => {
         const matchesQuery = cleanText(item.guia).includes(query) || 
-                             cleanText(item.driver).includes(query) ||
-                             cleanText(item.descripcion).includes(query);
+                             cleanText(item.driver).includes(query);
         const matchesAlmacen = !selectedAlmacen || item.almacen === selectedAlmacen;
-        return matchesQuery && matchesAlmacen;
+        const matchesTipo = !selectedTipo || item.tipo === selectedTipo;
+        return matchesQuery && matchesAlmacen && matchesTipo;
       });
 
       renderTable(filtered);
