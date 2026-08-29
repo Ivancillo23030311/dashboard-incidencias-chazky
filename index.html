@@ -20,7 +20,7 @@
           <span class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white">Incidencias de Flotilla — Chazky</h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Panel consolidado de Guías y Drivers</p>
+        <p class="text-slate-400 text-sm mt-1">Panel consolidado en tiempo real</p>
       </div>
       
       <!-- Buscador y Filtros -->
@@ -30,8 +30,6 @@
         <select id="almacenFilter" onchange="filterData()" 
                 class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
           <option value="">Todos los almacenes</option>
-          <option value="Toreo">Toreo</option>
-          <option value="Sur">Sur</option>
         </select>
         <select id="typeFilter" onchange="filterData()" 
                 class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
@@ -52,115 +50,106 @@
       </div>
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
         <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Estado de Conexión</span>
-        <div id="statusKpi" class="text-base font-semibold text-amber-400 mt-2">● Cargando datos...</div>
+        <div id="statusKpi" class="text-base font-semibold text-amber-400 mt-2">● Conectando con Google Sheets...</div>
       </div>
     </div>
 
     <!-- Rejilla -->
     <main id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="col-span-full text-center py-12 text-slate-500">Cargando y vinculando datos...</div>
+      <div class="col-span-full text-center py-12 text-slate-500">Cargando incidencias y conductores...</div>
     </main>
   </div>
 
   <script>
     const SPREADSHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
-    
-    // IDs numéricos de pestañas (gid) para evitar errores de nombre
-    const GID_GUIAS = '1995934926'; 
-    const GID_DRIVERS = '0'; 
 
-    let guiasData = [];
-    let driversMap = {};
     let mergedIncidents = [];
-    let guiasLoaded = false;
-    let driversLoaded = false;
 
-    // 1. Manejador de pestaña Guias
-    window.handleGuiasData = function(response) {
-      guiasLoaded = true;
-      if (response && response.table && response.table.rows) {
-        guiasData = response.table.rows.map(r => {
-          const c = r.c || [];
-          return {
-            guia: c[0] ? (c[0].v !== null ? c[0].v : c[0].f) : '',
-            driver: c[1] ? (c[1].v !== null ? c[1].v : c[1].f) : 'Sin asignar',
-            fecha: c[2] ? (c[2].f || c[2].v) : 'N/A',
-            descripcion: c[3] ? (c[3].v !== null ? c[3].v : c[3].f) : 'Sin comentarios',
-            tipo: c[4] ? (c[4].v !== null ? c[4].v : c[4].f) : 'Incidencia General'
-          };
-        }).filter(item => item.guia && String(item.guia).toLowerCase() !== 'guía' && String(item.guia).toLowerCase() !== 'guia');
-      }
-      checkAndMerge();
-    };
-
-    // 2. Manejador de pestaña DRIVERS
-    window.handleDriversData = function(response) {
-      driversLoaded = true;
-      if (response && response.table && response.table.rows) {
-        response.table.rows.forEach(r => {
-          const c = r.c || [];
-          // Busca el nombre del driver o guía en cualquier columna inicial
-          const col0 = c[0] ? String(c[0].v || c[0].f || '').trim().toLowerCase() : '';
-          const col1 = c[1] ? String(c[1].v || c[1].f || '').trim() : '';
-          const col2 = c[2] ? String(c[2].v || c[2].f || '').trim() : '';
-
-          if (col0) {
-            // Asigna el almacén si se encuentra en col1 o col2
-            driversMap[col0] = col1 || col2 || 'Sin Almacén';
+    // Parser CSV simple y robusto
+    function parseCSV(text) {
+      const lines = text.split(/\r\n|\n/);
+      return lines.map(line => {
+        const row = [];
+        let insideQuote = false;
+        let entry = '';
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            insideQuote = !insideQuote;
+          } else if (char === ',' && !insideQuote) {
+            row.push(entry.trim().replace(/^"|"$/g, ''));
+            entry = '';
+          } else {
+            entry += char;
           }
-        });
-      }
-      checkAndMerge();
-    };
-
-    // 3. Unificar datos
-    function checkAndMerge() {
-      if (!guiasLoaded) return; // Espera al menos la carga principal
-
-      mergedIncidents = guiasData.map(item => {
-        const driverKey = String(item.driver).trim().toLowerCase();
-        const guiaKey = String(item.guia).trim().toLowerCase();
-        
-        // Busca coincidencias de almacén por Driver o por Guía
-        let almacen = driversMap[driverKey] || driversMap[guiaKey] || 'No especificado';
-
-        return { ...item, almacen };
-      });
-
-      if (mergedIncidents.length === 0) {
-        showError('No se encontraron registros activos en la hoja de Guías.');
-        return;
-      }
-
-      document.getElementById('statusKpi').className = 'text-base font-semibold text-emerald-400 mt-2';
-      document.getElementById('statusKpi').textContent = '● Conectado (Guias + DRIVERS)';
-      populateTypeDropdown();
-      renderCards(mergedIncidents);
-      updateKPIs(mergedIncidents);
+        }
+        row.push(entry.trim().replace(/^"|"$/g, ''));
+        return row;
+      }).filter(row => row.some(cell => cell !== ''));
     }
 
-    function initMultiFetch() {
-      // Intentar cargar Guias por GID
-      const s1 = document.createElement('script');
-      s1.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID_GUIAS}&tqx=responseHandler:handleGuiasData`;
-      s1.onerror = () => {
-        // Fallback por nombre si el GID falla
-        const s1_alt = document.createElement('script');
-        s1_alt.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=Guias&tqx=responseHandler:handleGuiasData`;
-        document.body.appendChild(s1_alt);
-      };
-      document.body.appendChild(s1);
+    async function loadAllData() {
+      try {
+        // Cargar Pestaña Guias y Pestaña DRIVERS en paralelo
+        const urlGuias = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=Guias`;
+        const urlDrivers = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=DRIVERS`;
 
-      // Intentar cargar DRIVERS por GID
-      const s2 = document.createElement('script');
-      s2.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID_DRIVERS}&tqx=responseHandler:handleDriversData`;
-      s2.onerror = () => {
-        // Fallback por nombre
-        const s2_alt = document.createElement('script');
-        s2_alt.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=DRIVERS&tqx=responseHandler:handleDriversData`;
-        document.body.appendChild(s2_alt);
-      };
-      document.body.appendChild(s2);
+        const [resGuias, resDrivers] = await Promise.all([
+          fetch(urlGuias).then(r => r.text()),
+          fetch(urlDrivers).then(r => r.text())
+        ]);
+
+        const rowsGuias = parseCSV(resGuias);
+        const rowsDrivers = parseCSV(resDrivers);
+
+        // Mapa de almacenes desde DRIVERS
+        const driversMap = {};
+        rowsDrivers.forEach((row, idx) => {
+          if (idx === 0) return; // Ignorar encabezado
+          const name = row[0] ? row[0].trim().toLowerCase() : '';
+          const nameAlt = row[1] ? row[1].trim().toLowerCase() : '';
+          
+          // Buscar columna de almacén (Toreo/Sur)
+          const almacen = row.find(c => c.toLowerCase().includes('toreo') || c.toLowerCase().includes('sur')) || row[1] || row[2] || 'Sin Almacén';
+          
+          if (name) driversMap[name] = almacen;
+          if (nameAlt) driversMap[nameAlt] = almacen;
+        });
+
+        // Construir datos de Incidencias
+        mergedIncidents = [];
+        rowsGuias.forEach((row, idx) => {
+          if (idx === 0) return; // Saltar encabezado
+          const guia = row[0] || '';
+          const driver = row[1] || 'Sin asignar';
+          const fecha = row[2] || 'N/A';
+          const descripcion = row[3] || 'Sin comentarios';
+          const tipo = row[4] || 'Incidencia General';
+
+          if (guia && guia.toLowerCase() !== 'guía' && guia.toLowerCase() !== 'guia') {
+            const driverKey = driver.trim().toLowerCase();
+            const almacen = driversMap[driverKey] || 'No especificado';
+
+            mergedIncidents.push({ guia, driver, fecha, descripcion, tipo, almacen });
+          }
+        });
+
+        if (mergedIncidents.length === 0) {
+          showError('No se encontraron guías en la hoja. Verifica que la pestaña se llame "Guias".');
+          return;
+        }
+
+        document.getElementById('statusKpi').className = 'text-base font-semibold text-emerald-400 mt-2';
+        document.getElementById('statusKpi').textContent = '● Conectado (Guias + DRIVERS)';
+
+        populateDropdowns();
+        renderCards(mergedIncidents);
+        updateKPIs(mergedIncidents);
+
+      } catch (err) {
+        console.error(err);
+        showError('Error al leer las hojas. Verifica que el archivo de Google Sheets tenga el acceso general en "Cualquier persona con el enlace".');
+      }
     }
 
     function showError(msg) {
@@ -175,7 +164,7 @@
     function renderCards(items) {
       const grid = document.getElementById('cardsGrid');
       if (items.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">No se encontraron incidencias con ese filtro.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">No se encontraron incidencias con los filtros aplicados.</div>`;
         return;
       }
 
@@ -189,7 +178,7 @@
               <span class="text-xs text-slate-500 font-mono">${item.fecha}</span>
             </div>
 
-            <div class="flex justify-between items-end">
+            <div class="flex justify-between items-end gap-2">
               <div>
                 <span class="text-[10px] font-bold text-slate-500 tracking-wider uppercase">Número de Guía</span>
                 <p class="text-lg font-bold text-slate-100 font-mono tracking-wide">${item.guia}</p>
@@ -221,22 +210,34 @@
       `).join('');
     }
 
-    function populateTypeDropdown() {
+    function populateDropdowns() {
+      // Tipos
       const types = [...new Set(mergedIncidents.map(i => i.tipo))].filter(Boolean);
-      const select = document.getElementById('typeFilter');
-      select.innerHTML = '<option value="">Todos los tipos</option>';
+      const selectType = document.getElementById('typeFilter');
+      selectType.innerHTML = '<option value="">Todos los tipos</option>';
       types.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t;
         opt.textContent = t;
-        select.appendChild(opt);
+        selectType.appendChild(opt);
+      });
+
+      // Almacenes
+      const almacenes = [...new Set(mergedIncidents.map(i => i.almacen))].filter(Boolean);
+      const selectAlmacen = document.getElementById('almacenFilter');
+      selectAlmacen.innerHTML = '<option value="">Todos los almacenes</option>';
+      almacenes.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        selectAlmacen.appendChild(opt);
       });
     }
 
     function filterData() {
       const query = document.getElementById('searchInput').value.toLowerCase();
       const selectedType = document.getElementById('typeFilter').value;
-      const selectedAlmacen = document.getElementById('almacenFilter').value.toLowerCase();
+      const selectedAlmacen = document.getElementById('almacenFilter').value;
 
       const filtered = mergedIncidents.filter(item => {
         const matchesQuery = String(item.guia).toLowerCase().includes(query) || 
@@ -244,7 +245,7 @@
                              String(item.descripcion).toLowerCase().includes(query) ||
                              String(item.almacen).toLowerCase().includes(query);
         const matchesType = !selectedType || item.tipo === selectedType;
-        const matchesAlmacen = !selectedAlmacen || item.almacen.toLowerCase().includes(selectedAlmacen);
+        const matchesAlmacen = !selectedAlmacen || item.almacen === selectedAlmacen;
         return matchesQuery && matchesType && matchesAlmacen;
       });
 
@@ -258,7 +259,7 @@
       document.getElementById('driversKpi').textContent = uniqueDrivers;
     }
 
-    initMultiFetch();
+    loadAllData();
   </script>
 </body>
 </html>
