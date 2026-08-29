@@ -13,15 +13,17 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
   <div class="max-w-7xl mx-auto space-y-6">
     
+    <!-- Header principal -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
       <div>
         <div class="flex items-center gap-3">
           <span class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white">Incidencias de Flotilla — Chazky</h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Panel interactivo tipo Lovable en tiempo real</p>
+        <p class="text-slate-400 text-sm mt-1">Panel interactivo en tiempo real</p>
       </div>
       
+      <!-- Buscador y Filtros -->
       <div class="flex flex-col sm:flex-row gap-3">
         <input type="text" id="searchInput" oninput="filterData()" placeholder="Buscar por guía, driver..." 
                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
@@ -32,6 +34,7 @@
       </div>
     </header>
 
+    <!-- Métricas Rápidas (KPIs) -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
         <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total de Registros</span>
@@ -47,6 +50,7 @@
       </div>
     </div>
 
+    <!-- Feed de Tarjetas Tipo Lovable -->
     <main id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="col-span-full text-center py-12 text-slate-500">Cargando incidencias de Google Sheets...</div>
     </main>
@@ -54,46 +58,45 @@
 
   <script>
     const SHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
-    // Endpoint para hoja publicada en la web
-    const CSV_URL = `https://docs.google.com/sheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-
     let rawIncidents = [];
 
-    async function fetchSheetData() {
-      try {
-        const response = await fetch(CSV_URL);
-        const csvText = await response.text();
-        rawIncidents = parseCSV(csvText);
-        populateTypeDropdown();
-        renderCards(rawIncidents);
-        updateKPIs(rawIncidents);
-      } catch (error) {
-        document.getElementById('cardsGrid').innerHTML = `
-          <div class="col-span-full bg-red-950/30 border border-red-800/50 p-6 rounded-xl text-red-400 text-center">
-            Error al sincronizar datos. Por favor recarga la página.
-          </div>`;
+    // Función callback global llamada automáticamente por la API de Google
+    window.handleSheetResponse = function(response) {
+      if (!response.table || !response.table.rows) {
+        showError('No se encontraron datos válidos en la hoja.');
+        return;
       }
-    }
 
-    function parseCSV(text) {
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      if (lines.length < 2) return [];
-
-      return lines.slice(1).map(line => {
-        const regex = /(?:^|,)(?:"([^"]*(?:""[^"]*)*)"|([^",]*))/g;
-        const matches = [];
-        let match;
-        while ((match = regex.exec(line)) !== null) {
-          matches.push((match[1] || match[2] || '').replace(/""/g, '"').trim());
-        }
+      const rows = response.table.rows;
+      rawIncidents = rows.map(r => {
+        const c = r.c || [];
         return {
-          guia: matches[0] || 'N/A',
-          driver: matches[1] || 'Sin asignar',
-          fecha: matches[2] || 'N/A',
-          descripcion: matches[3] || 'Sin comentarios',
-          tipo: matches[4] || 'Incidencia General'
+          guia: c[0] ? (c[0].v || c[0].f || 'N/A') : 'N/A',
+          driver: c[1] ? (c[1].v || c[1].f || 'Sin asignar') : 'Sin asignar',
+          fecha: c[2] ? (c[2].f || c[2].v || 'N/A') : 'N/A',
+          descripcion: c[3] ? (c[3].v || c[3].f || 'Sin comentarios') : 'Sin comentarios',
+          tipo: c[4] ? (c[4].v || c[4].f || 'Incidencia General') : 'Incidencia General'
         };
       });
+
+      populateTypeDropdown();
+      renderCards(rawIncidents);
+      updateKPIs(rawIncidents);
+    };
+
+    function loadSheetData() {
+      // Inyección mediante script tag (evita problemas de CORS)
+      const script = document.createElement('script');
+      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:handleSheetResponse`;
+      script.onerror = () => showError('Error de conexión con Google Sheets. Verifica los permisos de acceso.');
+      document.body.appendChild(script);
+    }
+
+    function showError(msg) {
+      document.getElementById('cardsGrid').innerHTML = `
+        <div class="col-span-full bg-red-950/30 border border-red-800/50 p-6 rounded-xl text-red-400 text-center">
+          ${msg}
+        </div>`;
     }
 
     function renderCards(items) {
@@ -120,7 +123,7 @@
 
             <div class="flex items-center gap-2 pt-1">
               <div class="h-6 w-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">
-                ${item.driver.charAt(0)}
+                ${String(item.driver).charAt(0)}
               </div>
               <span class="text-sm font-medium text-slate-300">${item.driver}</span>
             </div>
@@ -151,9 +154,9 @@
       const selectedType = document.getElementById('typeFilter').value;
 
       const filtered = rawIncidents.filter(item => {
-        const matchesQuery = item.guia.toLowerCase().includes(query) || 
-                             item.driver.toLowerCase().includes(query) ||
-                             item.descripcion.toLowerCase().includes(query);
+        const matchesQuery = String(item.guia).toLowerCase().includes(query) || 
+                             String(item.driver).toLowerCase().includes(query) ||
+                             String(item.descripcion).toLowerCase().includes(query);
         const matchesType = !selectedType || item.tipo === selectedType;
         return matchesQuery && matchesType;
       });
@@ -168,7 +171,7 @@
       document.getElementById('driversKpi').textContent = uniqueDrivers;
     }
 
-    fetchSheetData();
+    loadSheetData();
   </script>
 </body>
 </html>
