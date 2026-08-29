@@ -14,7 +14,6 @@
     :root {
       --neon-primary: #ff0055;
       --neon-secondary: #ffaa00;
-      --neon-accent: #ccff00;
       --neon-glow: rgba(255, 0, 85, 0.35);
     }
 
@@ -27,17 +26,11 @@
       font-family: 'Space Grotesk', sans-serif;
     }
 
-    .neon-border {
-      border-color: var(--neon-primary);
-      box-shadow: 0 0 15px var(--neon-glow);
-    }
-
     .neon-text-primary { color: var(--neon-primary); }
-    .neon-text-secondary { color: var(--neon-secondary); }
     .neon-bg-primary { background-color: var(--neon-primary); }
 
     .glow-box {
-      box-shadow: 0 0 20px -5px var(--neon-glow);
+      box-shadow: 0 0 25px -5px var(--neon-glow);
     }
 
     /* Scrollbar personalizada */
@@ -54,7 +47,7 @@
     <!-- BARRA SUPERIOR / CONTROL TOWER HEADER -->
     <header class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 md:p-6 backdrop-blur-xl relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 glow-box">
       <!-- Luz ambiental superior -->
-      <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-30 var(--neon-bg-primary)" id="ambientGlow" style="background-color: var(--neon-primary)"></div>
+      <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-30 transition-all duration-500" id="ambientGlow" style="background-color: var(--neon-primary)"></div>
 
       <div class="relative z-10">
         <div class="flex items-center gap-3">
@@ -78,13 +71,15 @@
       <!-- BUSCADOR & PERSONALIZADOR DE COLOR -->
       <div class="relative z-10 flex flex-wrap items-center gap-3">
         
-        <!-- Palette Selector -->
-        <div class="bg-slate-950/80 p-1.5 border border-slate-800 rounded-2xl flex items-center gap-1.5">
-          <span class="text-[10px] font-bold text-slate-500 uppercase px-2 font-tech">TEMA NEÓN:</span>
-          <button onclick="changeTheme('warm')" class="w-6 h-6 rounded-full bg-gradient-to-r from-red-500 via-amber-500 to-yellow-400 border-2 border-white/20 hover:scale-110 transition-transform" title="Warm Neon"></button>
-          <button onclick="changeTheme('cyber')" class="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 border-2 border-white/20 hover:scale-110 transition-transform" title="Cyber Lime"></button>
-          <button onclick="changeTheme('fuchsia')" class="w-6 h-6 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 border-2 border-white/20 hover:scale-110 transition-transform" title="Electric Pink"></button>
-          <button onclick="changeTheme('electric')" class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 border-2 border-white/20 hover:scale-110 transition-transform" title="Electric Blue"></button>
+        <!-- Palette Selector Ampliado -->
+        <div class="bg-slate-950/90 p-2 border border-slate-800 rounded-2xl flex items-center gap-2">
+          <span class="text-[10px] font-bold text-slate-500 uppercase px-1 font-tech">TEMAS:</span>
+          <button onclick="changeTheme('warm')" class="w-6 h-6 rounded-full bg-gradient-to-r from-red-500 to-amber-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Warm Neon / Fuego"></button>
+          <button onclick="changeTheme('cyber')" class="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Cyber Lime / Verde"></button>
+          <button onclick="changeTheme('fuchsia')" class="w-6 h-6 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Pink / Rosa"></button>
+          <button onclick="changeTheme('electric')" class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Blue / Azul"></button>
+          <button onclick="changeTheme('toxic')" class="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-300 to-lime-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Toxic Gold / Neón Gold"></button>
+          <button onclick="changeTheme('purple')" class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 border-2 border-white/20 hover:scale-125 transition-transform" title="Deep Purple / Violeta"></button>
         </div>
 
         <!-- Inputs de Filtro -->
@@ -124,7 +119,7 @@
           <span class="text-xl">⚡</span>
         </div>
         <div id="statusKpi" class="text-sm font-bold font-tech text-amber-400 mt-3">● SINCRO PENDIENTE</div>
-        <p class="text-[10px] text-slate-500 mt-1">Conexión con Google Sheets</p>
+        <p class="text-[10px] text-slate-500 mt-1">Conexión directa a Google Sheets</p>
       </div>
     </div>
 
@@ -198,7 +193,7 @@
     let chartAlmacenInstance = null;
     let chartTipoInstance = null;
 
-    // Paletas de color fosforescentes
+    // 6 Paletas de colores fosforescentes / neón
     const colorPalettes = {
       warm: {
         primary: '#ff0055',
@@ -219,6 +214,16 @@
         primary: '#3b82f6',
         secondary: '#06b6d4',
         colors: ['#3b82f6', '#06b6d4', '#6366f1', '#60a5fa', '#38bdf8', '#818cf8']
+      },
+      toxic: {
+        primary: '#facc15',
+        secondary: '#84cc16',
+        colors: ['#facc15', '#84cc16', '#10b981', '#f59e0b', '#eab308', '#06b6d4']
+      },
+      purple: {
+        primary: '#a855f7',
+        secondary: '#6366f1',
+        colors: ['#a855f7', '#6366f1', '#ec4899', '#8b5cf6', '#d946ef', '#3b82f6']
       }
     };
 
@@ -234,8 +239,18 @@
       const ambient = document.getElementById('ambientGlow');
       if (ambient) ambient.style.backgroundColor = theme.primary;
 
-      // Actualizar gráficas con la nueva paleta
       updateCharts();
+    }
+
+    // Normalizador estricto de textos para emparejar nombres con o sin acentos/espacios
+    function cleanText(str) {
+      if (!str) return '';
+      return str.toString()
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
+        .replace(/[^a-z0-9 ]/g, '') // quita caracteres especiales
+        .trim()
+        .replace(/\s+/g, ' '); // reduce espacios múltiples
     }
 
     function parseCSV(text) {
@@ -270,37 +285,72 @@
         const rowsGuias = parseCSV(resGuias);
         const rowsDrivers = parseCSV(resDrivers);
 
-        // Mapa de almacenes
+        // Mapeo exhaustivo de Drivers a Almacén
         const driversMap = {};
         rowsDrivers.forEach((row) => {
-          const name = row[0] ? row[0].trim().toLowerCase() : '';
-          const almacen = row.find(c => c.toLowerCase().includes('toreo') || c.toLowerCase().includes('sur')) || 'Sin Almacén';
-          if (name) driversMap[name] = almacen;
+          const rawDriverName = row[0] ? row[0].trim() : '';
+          const cleanedDriverName = cleanText(rawDriverName);
+          
+          // Buscar si hay mención de almacén en cualquier celda de la fila
+          let almacenEncontrado = '';
+          row.forEach(cell => {
+            const cellClean = cleanText(cell);
+            if (cellClean.includes('toreo')) almacenEncontrado = 'TOREO';
+            else if (cellClean.includes('sur')) almacenEncontrado = 'SUR';
+          });
+
+          if (!almacenEncontrado && row[1]) {
+            const c1 = cleanText(row[1]);
+            if (c1.includes('toreo')) almacenEncontrado = 'TOREO';
+            else if (c1.includes('sur')) almacenEncontrado = 'SUR';
+            else if (c1.length > 0) almacenEncontrado = row[1].toUpperCase();
+          }
+
+          if (cleanedDriverName) {
+            driversMap[cleanedDriverName] = almacenEncontrado || 'SIN ASIGNAR';
+          }
         });
 
         // Filtrado de incidencias reales
         mergedIncidents = [];
         rowsGuias.forEach((row) => {
           const guia = row[0] ? row[0].trim() : '';
-          const driver = row[1] ? row[1].trim() : 'Sin asignar';
+          const driverRaw = row[1] ? row[1].trim() : 'Sin Asignar';
           const fecha = row[2] ? row[2].trim() : 'N/A';
           const descripcion = row[3] ? row[3].trim() : 'Sin comentarios';
           const tipo = row[4] ? row[4].trim() : 'Incidencia General';
 
-          const isTrash = guia.toLowerCase().includes('guía') || 
-                          guia.toLowerCase().includes('guia') || 
-                          guia.toLowerCase().includes('mensaje whatsapp') || 
+          const isTrash = cleanText(guia).includes('guia') || 
+                          cleanText(guia).includes('mensaje whatsapp') || 
                           guia.length > 30;
 
           if (guia && !isTrash) {
-            const driverKey = driver.toLowerCase();
-            const almacen = driversMap[driverKey] || 'Sin Especificar';
-            mergedIncidents.push({ guia, driver, fecha, descripcion, tipo, almacen });
+            const cleanedDriverKey = cleanText(driverRaw);
+            
+            // Intento 1: Coincidencia exacta
+            let almacenFound = driversMap[cleanedDriverKey];
+
+            // Intento 2: Coincidencia parcial si no se encontró
+            if (!almacenFound) {
+              const driverKeys = Object.keys(driversMap);
+              const partialMatchKey = driverKeys.find(key => key.includes(cleanedDriverKey) || cleanedDriverKey.includes(key));
+              if (partialMatchKey) almacenFound = driversMap[partialMatchKey];
+            }
+
+            const almacenFinal = almacenFound || 'PENDIENTE DE ASIGNAR';
+            mergedIncidents.push({ 
+              guia, 
+              driver: driverRaw || 'Sin Asignar', 
+              fecha, 
+              descripcion, 
+              tipo, 
+              almacen: almacenFinal 
+            });
           }
         });
 
         if (mergedIncidents.length === 0) {
-          showError('No se encontraron guías en la base de datos.');
+          showError('No se encontraron guías válidas en la hoja de cálculo.');
           return;
         }
 
@@ -328,12 +378,17 @@
     function renderTable(items) {
       const tbody = document.getElementById('guiasTableBody');
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No se encontraron resultados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No se encontraron resultados para los filtros seleccionados.</td></tr>`;
         return;
       }
 
       let html = '';
       items.forEach((item, index) => {
+        const isPendiente = item.almacen === 'PENDIENTE DE ASIGNAR';
+        const badgeClass = isPendiente 
+          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' 
+          : 'bg-slate-800 text-slate-300 border-slate-700';
+
         html += `
           <tr onclick="toggleRow(${index})" class="hover:bg-slate-800/50 cursor-pointer transition-colors group">
             <td class="py-3.5 px-5 font-mono font-bold text-white group-hover:text-amber-400 flex items-center gap-2">
@@ -343,7 +398,7 @@
               <span class="inline-block w-2 h-2 rounded-full bg-slate-700 mr-2"></span>${item.driver}
             </td>
             <td class="py-3.5 px-5">
-              <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold font-tech uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+              <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold font-tech uppercase tracking-wider border ${badgeClass}">
                 📍 ${item.almacen}
               </span>
             </td>
@@ -360,7 +415,7 @@
               <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
                 <div class="flex items-center justify-between text-xs font-tech">
                   <span class="text-slate-400">TIPO DE ANOMALÍA: <strong class="text-red-400">${item.tipo}</strong></span>
-                  <span class="text-slate-500">CODIGO: ${item.guia}</span>
+                  <span class="text-slate-500">CÓDIGO GUÍA: ${item.guia}</span>
                 </div>
                 <div>
                   <span class="text-[10px] font-bold uppercase font-tech text-slate-500 block mb-1">REPORTE / COMENTARIOS:</span>
@@ -387,7 +442,7 @@
 
       const palette = colorPalettes[currentTheme].colors;
 
-      // 1. Data Almacén
+      // Chart 1: Almacén
       const almacenCounts = {};
       mergedIncidents.forEach(i => {
         almacenCounts[i.almacen] = (almacenCounts[i.almacen] || 0) + 1;
@@ -418,7 +473,7 @@
         }
       });
 
-      // 2. Data Tipo
+      // Chart 2: Tipo de falla
       const tipoCounts = {};
       mergedIncidents.forEach(i => {
         tipoCounts[i.tipo] = (tipoCounts[i.tipo] || 0) + 1;
@@ -463,13 +518,13 @@
     }
 
     function filterData() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
+      const query = cleanText(document.getElementById('searchInput').value);
       const selectedAlmacen = document.getElementById('almacenFilter').value;
 
       const filtered = mergedIncidents.filter(item => {
-        const matchesQuery = item.guia.toLowerCase().includes(query) || 
-                             item.driver.toLowerCase().includes(query) ||
-                             item.descripcion.toLowerCase().includes(query);
+        const matchesQuery = cleanText(item.guia).includes(query) || 
+                             cleanText(item.driver).includes(query) ||
+                             cleanText(item.descripcion).includes(query);
         const matchesAlmacen = !selectedAlmacen || item.almacen === selectedAlmacen;
         return matchesQuery && matchesAlmacen;
       });
