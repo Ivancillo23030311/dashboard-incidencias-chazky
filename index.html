@@ -11,21 +11,21 @@
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
-  <div class="max-w-7xl mx-auto space-y-6">
+  <div class="max-w-5xl mx-auto space-y-6">
     
-    <!-- Header -->
+    <!-- Header principal -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
       <div>
         <div class="flex items-center gap-3">
           <span class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
           <h1 class="text-2xl font-bold tracking-tight text-white">Incidencias de Flotilla — Chazky</h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Panel consolidado en tiempo real</p>
+        <p class="text-slate-400 text-sm mt-1">Haz clic en cualquier guía para expandir sus detalles</p>
       </div>
       
       <!-- Buscador y Filtros -->
       <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" oninput="filterData()" placeholder="Buscar por guía, driver, almacén..." 
+        <input type="text" id="searchInput" oninput="filterData()" placeholder="Buscar guía, driver..." 
                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
         <select id="almacenFilter" onchange="filterData()" 
                 class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
@@ -38,7 +38,7 @@
       </div>
     </header>
 
-    <!-- KPIs -->
+    <!-- Métricas rápidas (KPIs) -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
         <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Incidencias</span>
@@ -54,18 +54,19 @@
       </div>
     </div>
 
-    <!-- Rejilla -->
-    <main id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="col-span-full text-center py-12 text-slate-500">Cargando incidencias y conductores...</div>
+    <!-- Lista desplegable de Guías -->
+    <main id="guiasAccordion" class="space-y-3">
+      <div class="text-center py-12 text-slate-500 bg-slate-900/30 rounded-2xl border border-slate-800">
+        Cargando guías e incidencias...
+      </div>
     </main>
   </div>
 
   <script>
     const SPREADSHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
-
     let mergedIncidents = [];
 
-    // Parser CSV simple y robusto
+    // Carga de CSV
     function parseCSV(text) {
       const lines = text.split(/\r\n|\n/);
       return lines.map(line => {
@@ -90,7 +91,6 @@
 
     async function loadAllData() {
       try {
-        // Cargar Pestaña Guias y Pestaña DRIVERS en paralelo
         const urlGuias = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=Guias`;
         const urlDrivers = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=DRIVERS`;
 
@@ -102,40 +102,34 @@
         const rowsGuias = parseCSV(resGuias);
         const rowsDrivers = parseCSV(resDrivers);
 
-        // Mapa de almacenes desde DRIVERS
+        // Mapa de almacenes
         const driversMap = {};
         rowsDrivers.forEach((row, idx) => {
-          if (idx === 0) return; // Ignorar encabezado
+          if (idx === 0) return;
           const name = row[0] ? row[0].trim().toLowerCase() : '';
-          const nameAlt = row[1] ? row[1].trim().toLowerCase() : '';
-          
-          // Buscar columna de almacén (Toreo/Sur)
-          const almacen = row.find(c => c.toLowerCase().includes('toreo') || c.toLowerCase().includes('sur')) || row[1] || row[2] || 'Sin Almacén';
-          
+          const almacen = row.find(c => c.toLowerCase().includes('toreo') || c.toLowerCase().includes('sur')) || row[1] || 'Sin Almacén';
           if (name) driversMap[name] = almacen;
-          if (nameAlt) driversMap[nameAlt] = almacen;
         });
 
-        // Construir datos de Incidencias
+        // Construir datos
         mergedIncidents = [];
         rowsGuias.forEach((row, idx) => {
-          if (idx === 0) return; // Saltar encabezado
+          if (idx === 0) return;
           const guia = row[0] || '';
           const driver = row[1] || 'Sin asignar';
           const fecha = row[2] || 'N/A';
-          const descripcion = row[3] || 'Sin comentarios';
+          const descripcion = row[3] || 'Sin comentarios adicionales.';
           const tipo = row[4] || 'Incidencia General';
 
           if (guia && guia.toLowerCase() !== 'guía' && guia.toLowerCase() !== 'guia') {
             const driverKey = driver.trim().toLowerCase();
             const almacen = driversMap[driverKey] || 'No especificado';
-
             mergedIncidents.push({ guia, driver, fecha, descripcion, tipo, almacen });
           }
         });
 
         if (mergedIncidents.length === 0) {
-          showError('No se encontraron guías en la hoja. Verifica que la pestaña se llame "Guias".');
+          showError('No se encontraron registros de guías.');
           return;
         }
 
@@ -143,47 +137,57 @@
         document.getElementById('statusKpi').textContent = '● Conectado (Guias + DRIVERS)';
 
         populateDropdowns();
-        renderCards(mergedIncidents);
+        renderAccordion(mergedIncidents);
         updateKPIs(mergedIncidents);
 
       } catch (err) {
         console.error(err);
-        showError('Error al leer las hojas. Verifica que el archivo de Google Sheets tenga el acceso general en "Cualquier persona con el enlace".');
+        showError('Error al conectar con Google Sheets.');
       }
     }
 
     function showError(msg) {
-      document.getElementById('cardsGrid').innerHTML = `
-        <div class="col-span-full bg-red-950/30 border border-red-800/50 p-6 rounded-xl text-red-400 text-center">
+      document.getElementById('guiasAccordion').innerHTML = `
+        <div class="bg-red-950/30 border border-red-800/50 p-6 rounded-xl text-red-400 text-center">
           ${msg}
         </div>`;
       document.getElementById('statusKpi').className = 'text-base font-semibold text-red-400 mt-2';
       document.getElementById('statusKpi').textContent = '● Error de conexión';
     }
 
-    function renderCards(items) {
-      const grid = document.getElementById('cardsGrid');
+    function renderAccordion(items) {
+      const container = document.getElementById('guiasAccordion');
       if (items.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">No se encontraron incidencias con los filtros aplicados.</div>`;
+        container.innerHTML = `<div class="text-center py-12 text-slate-500 bg-slate-900/30 rounded-2xl">No se encontraron guías con los filtros seleccionados.</div>`;
         return;
       }
 
-      grid.innerHTML = items.map(item => `
-        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between gap-4 shadow-lg shadow-black/40">
-          <div class="space-y-3">
-            <div class="flex items-start justify-between gap-2">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
-                ${item.tipo}
-              </span>
-              <span class="text-xs text-slate-500 font-mono">${item.fecha}</span>
+      container.innerHTML = items.map((item, index) => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-all shadow-md">
+          
+          <!-- Encabezado de la Guía (Fila interactiva) -->
+          <button onclick="toggleDetails(${index})" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 flex-1">
+              <!-- Número de Guía -->
+              <div>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block sm:hidden">Guía</span>
+                <span class="font-mono font-bold text-base text-white tracking-wide">${item.guia}</span>
+              </div>
+
+              <!-- Driver -->
+              <div class="flex items-center gap-2">
+                <div class="h-5 w-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px] font-bold">
+                  ${String(item.driver).charAt(0)}
+                </div>
+                <span class="text-sm font-medium text-slate-300">${item.driver}</span>
+              </div>
             </div>
 
-            <div class="flex justify-between items-end gap-2">
-              <div>
-                <span class="text-[10px] font-bold text-slate-500 tracking-wider uppercase">Número de Guía</span>
-                <p class="text-lg font-bold text-slate-100 font-mono tracking-wide">${item.guia}</p>
-              </div>
-              <span class="px-2.5 py-1 rounded-lg text-xs font-semibold ${
+            <!-- Etiquetas e Indicadores -->
+            <div class="flex items-center gap-3">
+              <!-- Badge Almacén -->
+              <span class="hidden sm:inline-flex px-2.5 py-1 rounded-lg text-xs font-semibold ${
                 item.almacen.toLowerCase().includes('toreo') 
                   ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' 
                   : item.almacen.toLowerCase().includes('sur') 
@@ -192,26 +196,71 @@
               }">
                 📍 ${item.almacen}
               </span>
-            </div>
 
-            <div class="flex items-center gap-2 pt-1">
-              <div class="h-6 w-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">
-                ${String(item.driver).charAt(0)}
+              <!-- Fecha -->
+              <span class="text-xs text-slate-500 font-mono hidden md:inline-block">${item.fecha}</span>
+
+              <!-- Ícono de desplegar -->
+              <div class="h-8 w-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
+                <svg id="icon-${index}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
-              <span class="text-sm font-medium text-slate-300">${item.driver}</span>
             </div>
+
+          </button>
+
+          <!-- Contenido desplegable (Detalles al hacer clic) -->
+          <div id="details-${index}" class="hidden border-t border-slate-800/60 bg-slate-950/70 p-5 space-y-4">
+            
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/40">
+              <div>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Tipo de Incidencia</span>
+                <span class="inline-flex items-center px-2.5 py-1 mt-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                  ${item.tipo}
+                </span>
+              </div>
+
+              <div class="sm:hidden">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Almacén</span>
+                <span class="text-xs font-medium text-slate-300">📍 ${item.almacen}</span>
+              </div>
+
+              <div>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Fecha de Registro</span>
+                <span class="text-xs font-mono text-slate-300">${item.fecha}</span>
+              </div>
+            </div>
+
+            <!-- Descripción de Criterios / Motivo -->
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Descripción / Criterios Fallidos:</span>
+              <p class="text-sm text-slate-300 bg-slate-900/80 p-4 rounded-xl border border-slate-800/80 whitespace-pre-line leading-relaxed">
+                ${item.descripcion}
+              </p>
+            </div>
+
           </div>
 
-          <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 text-xs text-slate-400 whitespace-pre-line">
-            <span class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Comentarios / Descripción:</span>
-            ${item.descripcion}
-          </div>
         </div>
       `).join('');
     }
 
+    // Función para mostrar / ocultar los detalles al hacer clic
+    function toggleDetails(index) {
+      const details = document.getElementById(`details-${index}`);
+      const icon = document.getElementById(`icon-${index}`);
+      
+      if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        details.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+
     function populateDropdowns() {
-      // Tipos
       const types = [...new Set(mergedIncidents.map(i => i.tipo))].filter(Boolean);
       const selectType = document.getElementById('typeFilter');
       selectType.innerHTML = '<option value="">Todos los tipos</option>';
@@ -222,7 +271,6 @@
         selectType.appendChild(opt);
       });
 
-      // Almacenes
       const almacenes = [...new Set(mergedIncidents.map(i => i.almacen))].filter(Boolean);
       const selectAlmacen = document.getElementById('almacenFilter');
       selectAlmacen.innerHTML = '<option value="">Todos los almacenes</option>';
@@ -249,7 +297,7 @@
         return matchesQuery && matchesType && matchesAlmacen;
       });
 
-      renderCards(filtered);
+      renderAccordion(filtered);
       updateKPIs(filtered);
     }
 
