@@ -317,12 +317,42 @@
         });
 
         mergedIncidents = [];
-        rowsGuias.forEach((row) => {
+        rowsGuias.forEach((row, rowIndex) => {
+          if (rowIndex === 0) return; // Omitir encabezados
+
           const guia = row[0] ? row[0].trim() : '';
           const driverRaw = row[1] ? row[1].trim() : 'Sin Asignar';
           const fecha = row[2] ? row[2].trim() : 'N/A';
-          // Tomamos directamente la columna de la incidencia (Columna E / índice 4 o D / índice 3)
-          const tipo = row[4] && row[4].trim() ? row[4].trim() : (row[3] ? row[3].trim() : 'Sin Clasificar');
+
+          // Búsqueda dinámica del Tipo de Incidencia según el patrón desplegable
+          let tipoFinal = '';
+          
+          for (let i = row.length - 1; i >= 3; i--) {
+            const val = row[i] ? row[i].trim() : '';
+            const valClean = cleanText(val);
+
+            if (
+              valClean.includes('terceros') || 
+              valClean.includes('evidencia') || 
+              valClean.includes('autorizacion') ||
+              valClean.includes('entrega')
+            ) {
+              tipoFinal = val;
+              break;
+            }
+          }
+
+          // Si no hace match por palabras clave, toma la última columna no vacía de la fila
+          if (!tipoFinal) {
+            for (let i = row.length - 1; i >= 3; i--) {
+              if (row[i] && row[i].trim().length > 0) {
+                tipoFinal = row[i].trim();
+                break;
+              }
+            }
+          }
+
+          if (!tipoFinal) tipoFinal = 'Sin Clasificar';
 
           const isTrash = cleanText(guia).includes('guia') || 
                           cleanText(guia).includes('mensaje whatsapp') || 
@@ -335,7 +365,7 @@
               guia, 
               driver: driverRaw || 'Sin Asignar', 
               fecha, 
-              tipo, 
+              tipo: tipoFinal, 
               almacen: almacenFinal 
             });
           }
@@ -384,6 +414,11 @@
           ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
           : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
 
+        const isSoloUna = cleanText(item.tipo).includes('solo 1');
+        const tipoBadgeClass = isSoloUna
+          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+          : 'bg-red-500/10 text-red-400 border-red-500/30';
+
         html += `
           <tr class="hover:bg-slate-800/50 transition-colors">
             <td class="py-3.5 px-5 font-mono font-bold text-white flex items-center gap-2">
@@ -398,7 +433,7 @@
               </span>
             </td>
             <td class="py-3.5 px-5">
-              <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold border ${tipoBadgeClass}">
                 ⚠️ ${item.tipo}
               </span>
             </td>
