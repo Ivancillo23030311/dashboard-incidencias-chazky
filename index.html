@@ -58,12 +58,13 @@
 
   <script>
     const SHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
+    const SHEET_NAME = 'Guias'; 
+
     let rawIncidents = [];
 
-    // Función callback global llamada automáticamente por la API de Google
     window.handleSheetResponse = function(response) {
-      if (!response.table || !response.table.rows) {
-        showError('No se encontraron datos válidos en la hoja.');
+      if (!response.table || !response.table.rows || response.table.rows.length === 0) {
+        showError('La pestaña especificada no contiene datos.');
         return;
       }
 
@@ -71,13 +72,18 @@
       rawIncidents = rows.map(r => {
         const c = r.c || [];
         return {
-          guia: c[0] ? (c[0].v || c[0].f || 'N/A') : 'N/A',
-          driver: c[1] ? (c[1].v || c[1].f || 'Sin asignar') : 'Sin asignar',
-          fecha: c[2] ? (c[2].f || c[2].v || 'N/A') : 'N/A',
-          descripcion: c[3] ? (c[3].v || c[3].f || 'Sin comentarios') : 'Sin comentarios',
-          tipo: c[4] ? (c[4].v || c[4].f || 'Incidencia General') : 'Incidencia General'
+          guia: c[0] ? (c[0].v !== null ? c[0].v : c[0].f) : 'N/A',
+          driver: c[1] ? (c[1].v !== null ? c[1].v : c[1].f) : 'Sin asignar',
+          fecha: c[2] ? (c[2].f || c[2].v) : 'N/A',
+          descripcion: c[3] ? (c[3].v !== null ? c[3].v : c[3].f) : 'Sin comentarios',
+          tipo: c[4] ? (c[4].v !== null ? c[4].v : c[4].f) : 'Incidencia General'
         };
-      });
+      }).filter(item => item.guia && item.guia !== 'N/A' && item.guia !== 'Guía' && item.guia !== 'GUIA');
+
+      if (rawIncidents.length === 0) {
+        showError('No se encontraron registros activos en la tabla.');
+        return;
+      }
 
       populateTypeDropdown();
       renderCards(rawIncidents);
@@ -85,10 +91,9 @@
     };
 
     function loadSheetData() {
-      // Inyección mediante script tag (evita problemas de CORS)
       const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:handleSheetResponse`;
-      script.onerror = () => showError('Error de conexión con Google Sheets. Verifica los permisos de acceso.');
+      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=responseHandler:handleSheetResponse`;
+      script.onerror = () => showError('Error de conexión con Google Sheets. Verifica el acceso público.');
       document.body.appendChild(script);
     }
 
