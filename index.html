@@ -3,70 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Incidencias Flotilla — Chazky</title>
+  <title>Chazky Control Tower — Incidencias Flotilla</title>
+  
+  <!-- Tailwind CSS & Chart.js -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    :root {
+      --neon-primary: #ff0055;
+      --neon-secondary: #ffaa00;
+      --neon-accent: #ccff00;
+      --neon-glow: rgba(255, 0, 85, 0.35);
+    }
+
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: #05070a;
+    }
+
+    .font-tech {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .neon-border {
+      border-color: var(--neon-primary);
+      box-shadow: 0 0 15px var(--neon-glow);
+    }
+
+    .neon-text-primary { color: var(--neon-primary); }
+    .neon-text-secondary { color: var(--neon-secondary); }
+    .neon-bg-primary { background-color: var(--neon-primary); }
+
+    .glow-box {
+      box-shadow: 0 0 20px -5px var(--neon-glow);
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0e17; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-primary); }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
-  <div class="max-w-5xl mx-auto space-y-6">
-    
-    <!-- Header principal -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
-      <div>
+<body class="text-slate-100 min-h-screen p-3 md:p-6 pb-12">
+
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- BARRA SUPERIOR / CONTROL TOWER HEADER -->
+    <header class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 md:p-6 backdrop-blur-xl relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 glow-box">
+      <!-- Luz ambiental superior -->
+      <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-30 var(--neon-bg-primary)" id="ambientGlow" style="background-color: var(--neon-primary)"></div>
+
+      <div class="relative z-10">
         <div class="flex items-center gap-3">
-          <span class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
-          <h1 class="text-2xl font-bold tracking-tight text-white">Incidencias de Flotilla — Chazky</h1>
+          <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 text-2xl">
+            📦
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-red-500/10 text-red-400 border border-red-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                LIVE LOGISTICS RADAR
+              </span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold font-tech tracking-tight text-white mt-1">
+              CHAZKY <span class="neon-text-primary" id="titleHighlight">EXPRESS</span> INCIDENCIAS
+            </h1>
+          </div>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Haz clic en cualquier guía para expandir sus detalles</p>
       </div>
-      
-      <!-- Buscador y Filtros -->
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" oninput="filterData()" placeholder="Buscar guía, driver..." 
-               class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+
+      <!-- BUSCADOR & PERSONALIZADOR DE COLOR -->
+      <div class="relative z-10 flex flex-wrap items-center gap-3">
+        
+        <!-- Palette Selector -->
+        <div class="bg-slate-950/80 p-1.5 border border-slate-800 rounded-2xl flex items-center gap-1.5">
+          <span class="text-[10px] font-bold text-slate-500 uppercase px-2 font-tech">TEMA NEÓN:</span>
+          <button onclick="changeTheme('warm')" class="w-6 h-6 rounded-full bg-gradient-to-r from-red-500 via-amber-500 to-yellow-400 border-2 border-white/20 hover:scale-110 transition-transform" title="Warm Neon"></button>
+          <button onclick="changeTheme('cyber')" class="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 border-2 border-white/20 hover:scale-110 transition-transform" title="Cyber Lime"></button>
+          <button onclick="changeTheme('fuchsia')" class="w-6 h-6 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 border-2 border-white/20 hover:scale-110 transition-transform" title="Electric Pink"></button>
+          <button onclick="changeTheme('electric')" class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 border-2 border-white/20 hover:scale-110 transition-transform" title="Electric Blue"></button>
+        </div>
+
+        <!-- Inputs de Filtro -->
+        <input type="text" id="searchInput" oninput="filterData()" placeholder="🔍 Buscar guía o driver..." 
+               class="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 w-full sm:w-44">
+        
         <select id="almacenFilter" onchange="filterData()" 
-                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
-          <option value="">Todos los almacenes</option>
-        </select>
-        <select id="typeFilter" onchange="filterData()" 
-                class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
-          <option value="">Todos los tipos</option>
+                class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none">
+          <option value="">Todos los Almacenes</option>
         </select>
       </div>
     </header>
 
-    <!-- Métricas rápidas (KPIs) -->
+    <!-- METRICAS / KPIS FLOTANTES -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
-        <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Incidencias</span>
-        <div id="totalKpi" class="text-3xl font-bold text-white mt-1">-</div>
+      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Total Paquetes / Guías</span>
+          <span class="text-xl">🚛</span>
+        </div>
+        <div id="totalKpi" class="text-4xl font-extrabold font-tech text-white mt-2">-</div>
+        <p class="text-[10px] text-slate-500 mt-1">Registrados en la flota activa</p>
       </div>
-      <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
-        <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Drivers Afectados</span>
-        <div id="driversKpi" class="text-3xl font-bold text-amber-400 mt-1">-</div>
+
+      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Drivers con Reporte</span>
+          <span class="text-xl">👷🏻‍♂️</span>
+        </div>
+        <div id="driversKpi" class="text-4xl font-extrabold font-tech neon-text-secondary mt-2">-</div>
+        <p class="text-[10px] text-slate-500 mt-1">Repartidores involucrados</p>
       </div>
-      <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
-        <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Estado de Conexión</span>
-        <div id="statusKpi" class="text-base font-semibold text-amber-400 mt-2">● Conectando con Google Sheets...</div>
+
+      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Estado de Conexión</span>
+          <span class="text-xl">⚡</span>
+        </div>
+        <div id="statusKpi" class="text-sm font-bold font-tech text-amber-400 mt-3">● SINCRO PENDIENTE</div>
+        <p class="text-[10px] text-slate-500 mt-1">Conexión con Google Sheets</p>
       </div>
     </div>
 
-    <!-- Lista desplegable de Guías -->
-    <main id="guiasAccordion" class="space-y-3">
-      <div class="text-center py-12 text-slate-500 bg-slate-900/30 rounded-2xl border border-slate-800">
-        Cargando guías e incidencias...
+    <!-- SECCIÓN DE GRÁFICAS DE PASTEL NEÓN -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Chart 1: Almacenes -->
+      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full neon-bg-primary" id="dotChart1"></span>
+            Distribución por Almacén / Hub
+          </h3>
+          <span class="text-xs text-slate-500 font-tech">PASTEL NEÓN</span>
+        </div>
+        <div class="relative h-64 flex items-center justify-center">
+          <canvas id="chartAlmacen"></canvas>
+        </div>
       </div>
-    </main>
+
+      <!-- Chart 2: Tipos de Incidencias -->
+      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            Tipos de Fallas / Criterios
+          </h3>
+          <span class="text-xs text-slate-500 font-tech">PASTEL NEÓN</span>
+        </div>
+        <div class="relative h-64 flex items-center justify-center">
+          <canvas id="chartTipo"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABLA DE MONITOREO DE PAQUETERÍA / GUÍAS -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-200 flex items-center gap-2">
+          <span>🏷️</span> Detalle Operativo de Guías
+        </h3>
+        <span class="text-xs text-slate-500">Haz clic en cualquier fila para expandir comentarios</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-950/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-tech">
+              <th class="py-3.5 px-5">Código de Guía</th>
+              <th class="py-3.5 px-5">Driver / Asignado</th>
+              <th class="py-3.5 px-5">Almacén HUB</th>
+              <th class="py-3.5 px-5">Fecha</th>
+              <th class="py-3.5 px-5 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="guiasTableBody" class="divide-y divide-slate-800/40 text-xs text-slate-300">
+            <tr>
+              <td colspan="5" class="py-12 text-center text-slate-500">Cargando radar de guías...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
   <script>
     const SPREADSHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
     let mergedIncidents = [];
+    let chartAlmacenInstance = null;
+    let chartTipoInstance = null;
 
-    // Carga de CSV
+    // Paletas de color fosforescentes
+    const colorPalettes = {
+      warm: {
+        primary: '#ff0055',
+        secondary: '#ffaa00',
+        colors: ['#ff0055', '#ffaa00', '#ccff00', '#ff3300', '#ff00aa', '#ffdd00']
+      },
+      cyber: {
+        primary: '#10b981',
+        secondary: '#06b6d4',
+        colors: ['#10b981', '#06b6d4', '#84cc16', '#3b82f6', '#a855f7', '#22c55e']
+      },
+      fuchsia: {
+        primary: '#d946ef',
+        secondary: '#ec4899',
+        colors: ['#d946ef', '#ec4899', '#f43f5e', '#8b5cf6', '#a855f7', '#fb7185']
+      },
+      electric: {
+        primary: '#3b82f6',
+        secondary: '#06b6d4',
+        colors: ['#3b82f6', '#06b6d4', '#6366f1', '#60a5fa', '#38bdf8', '#818cf8']
+      }
+    };
+
+    let currentTheme = 'warm';
+
+    function changeTheme(themeKey) {
+      currentTheme = themeKey;
+      const theme = colorPalettes[themeKey];
+      document.documentElement.style.setProperty('--neon-primary', theme.primary);
+      document.documentElement.style.setProperty('--neon-secondary', theme.secondary);
+      document.documentElement.style.setProperty('--neon-glow', theme.primary + '55');
+
+      const ambient = document.getElementById('ambientGlow');
+      if (ambient) ambient.style.backgroundColor = theme.primary;
+
+      // Actualizar gráficas con la nueva paleta
+      updateCharts();
+    }
+
     function parseCSV(text) {
       const lines = text.split(/\r\n|\n/);
       return lines.map(line => {
@@ -75,14 +246,11 @@
         let entry = '';
         for (let i = 0; i < line.length; i++) {
           const char = line[i];
-          if (char === '"') {
-            insideQuote = !insideQuote;
-          } else if (char === ',' && !insideQuote) {
+          if (char === '"') insideQuote = !insideQuote;
+          else if (char === ',' && !insideQuote) {
             row.push(entry.trim().replace(/^"|"$/g, ''));
             entry = '';
-          } else {
-            entry += char;
-          }
+          } else entry += char;
         }
         row.push(entry.trim().replace(/^"|"$/g, ''));
         return row;
@@ -104,176 +272,188 @@
 
         // Mapa de almacenes
         const driversMap = {};
-        rowsDrivers.forEach((row, idx) => {
-          if (idx === 0) return;
+        rowsDrivers.forEach((row) => {
           const name = row[0] ? row[0].trim().toLowerCase() : '';
-          const almacen = row.find(c => c.toLowerCase().includes('toreo') || c.toLowerCase().includes('sur')) || row[1] || 'Sin Almacén';
+          const almacen = row.find(c => c.toLowerCase().includes('toreo') || c.toLowerCase().includes('sur')) || 'Sin Almacén';
           if (name) driversMap[name] = almacen;
         });
 
-        // Construir datos
+        // Filtrado de incidencias reales
         mergedIncidents = [];
-        rowsGuias.forEach((row, idx) => {
-          if (idx === 0) return;
-          const guia = row[0] || '';
-          const driver = row[1] || 'Sin asignar';
-          const fecha = row[2] || 'N/A';
-          const descripcion = row[3] || 'Sin comentarios adicionales.';
-          const tipo = row[4] || 'Incidencia General';
+        rowsGuias.forEach((row) => {
+          const guia = row[0] ? row[0].trim() : '';
+          const driver = row[1] ? row[1].trim() : 'Sin asignar';
+          const fecha = row[2] ? row[2].trim() : 'N/A';
+          const descripcion = row[3] ? row[3].trim() : 'Sin comentarios';
+          const tipo = row[4] ? row[4].trim() : 'Incidencia General';
 
-          if (guia && guia.toLowerCase() !== 'guía' && guia.toLowerCase() !== 'guia') {
-            const driverKey = driver.trim().toLowerCase();
-            const almacen = driversMap[driverKey] || 'No especificado';
+          const isTrash = guia.toLowerCase().includes('guía') || 
+                          guia.toLowerCase().includes('guia') || 
+                          guia.toLowerCase().includes('mensaje whatsapp') || 
+                          guia.length > 30;
+
+          if (guia && !isTrash) {
+            const driverKey = driver.toLowerCase();
+            const almacen = driversMap[driverKey] || 'Sin Especificar';
             mergedIncidents.push({ guia, driver, fecha, descripcion, tipo, almacen });
           }
         });
 
         if (mergedIncidents.length === 0) {
-          showError('No se encontraron registros de guías.');
+          showError('No se encontraron guías en la base de datos.');
           return;
         }
 
-        document.getElementById('statusKpi').className = 'text-base font-semibold text-emerald-400 mt-2';
-        document.getElementById('statusKpi').textContent = '● Conectado (Guias + DRIVERS)';
+        document.getElementById('statusKpi').className = 'text-sm font-bold font-tech text-emerald-400 mt-3';
+        document.getElementById('statusKpi').textContent = '● ONLINE (SINCRO OK)';
 
         populateDropdowns();
-        renderAccordion(mergedIncidents);
+        renderTable(mergedIncidents);
         updateKPIs(mergedIncidents);
+        updateCharts();
 
       } catch (err) {
         console.error(err);
-        showError('Error al conectar con Google Sheets.');
+        showError('Error al sincronizar datos.');
       }
     }
 
     function showError(msg) {
-      document.getElementById('guiasAccordion').innerHTML = `
-        <div class="bg-red-950/30 border border-red-800/50 p-6 rounded-xl text-red-400 text-center">
-          ${msg}
-        </div>`;
-      document.getElementById('statusKpi').className = 'text-base font-semibold text-red-400 mt-2';
-      document.getElementById('statusKpi').textContent = '● Error de conexión';
+      document.getElementById('guiasTableBody').innerHTML = `
+        <tr><td colspan="5" class="py-8 text-center text-red-400 bg-red-950/20">${msg}</td></tr>`;
+      document.getElementById('statusKpi').className = 'text-sm font-bold font-tech text-red-400 mt-3';
+      document.getElementById('statusKpi').textContent = '● FALLA DE CONEXIÓN';
     }
 
-    function renderAccordion(items) {
-      const container = document.getElementById('guiasAccordion');
+    function renderTable(items) {
+      const tbody = document.getElementById('guiasTableBody');
       if (items.length === 0) {
-        container.innerHTML = `<div class="text-center py-12 text-slate-500 bg-slate-900/30 rounded-2xl">No se encontraron guías con los filtros seleccionados.</div>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No se encontraron resultados.</td></tr>`;
         return;
       }
 
-      container.innerHTML = items.map((item, index) => `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-all shadow-md">
-          
-          <!-- Encabezado de la Guía (Fila interactiva) -->
-          <button onclick="toggleDetails(${index})" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors">
-            
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 flex-1">
-              <!-- Número de Guía -->
-              <div>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block sm:hidden">Guía</span>
-                <span class="font-mono font-bold text-base text-white tracking-wide">${item.guia}</span>
-              </div>
-
-              <!-- Driver -->
-              <div class="flex items-center gap-2">
-                <div class="h-5 w-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px] font-bold">
-                  ${String(item.driver).charAt(0)}
-                </div>
-                <span class="text-sm font-medium text-slate-300">${item.driver}</span>
-              </div>
-            </div>
-
-            <!-- Etiquetas e Indicadores -->
-            <div class="flex items-center gap-3">
-              <!-- Badge Almacén -->
-              <span class="hidden sm:inline-flex px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                item.almacen.toLowerCase().includes('toreo') 
-                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' 
-                  : item.almacen.toLowerCase().includes('sur') 
-                  ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' 
-                  : 'bg-slate-800 text-slate-400 border border-slate-700'
-              }">
+      let html = '';
+      items.forEach((item, index) => {
+        html += `
+          <tr onclick="toggleRow(${index})" class="hover:bg-slate-800/50 cursor-pointer transition-colors group">
+            <td class="py-3.5 px-5 font-mono font-bold text-white group-hover:text-amber-400 flex items-center gap-2">
+              <span class="text-slate-600 font-normal">#</span>${item.guia}
+            </td>
+            <td class="py-3.5 px-5 font-medium text-slate-200">
+              <span class="inline-block w-2 h-2 rounded-full bg-slate-700 mr-2"></span>${item.driver}
+            </td>
+            <td class="py-3.5 px-5">
+              <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold font-tech uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
                 📍 ${item.almacen}
               </span>
+            </td>
+            <td class="py-3.5 px-5 font-mono text-slate-400 text-[11px]">
+              ${item.fecha}
+            </td>
+            <td class="py-3.5 px-5 text-right font-tech text-[11px] text-slate-400 group-hover:text-white">
+              ▼ DESPLEGAR
+            </td>
+          </tr>
 
-              <!-- Fecha -->
-              <span class="text-xs text-slate-500 font-mono hidden md:inline-block">${item.fecha}</span>
-
-              <!-- Ícono de desplegar -->
-              <div class="h-8 w-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
-                <svg id="icon-${index}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
+          <tr id="detail-${index}" class="hidden bg-slate-950/90">
+            <td colspan="5" class="p-5 border-t border-b border-slate-800/80">
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center justify-between text-xs font-tech">
+                  <span class="text-slate-400">TIPO DE ANOMALÍA: <strong class="text-red-400">${item.tipo}</strong></span>
+                  <span class="text-slate-500">CODIGO: ${item.guia}</span>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold uppercase font-tech text-slate-500 block mb-1">REPORTE / COMENTARIOS:</span>
+                  <p class="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800/80 whitespace-pre-line font-mono">
+                    ${item.descripcion}
+                  </p>
+                </div>
               </div>
-            </div>
+            </td>
+          </tr>
+        `;
+      });
 
-          </button>
-
-          <!-- Contenido desplegable (Detalles al hacer clic) -->
-          <div id="details-${index}" class="hidden border-t border-slate-800/60 bg-slate-950/70 p-5 space-y-4">
-            
-            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/40">
-              <div>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Tipo de Incidencia</span>
-                <span class="inline-flex items-center px-2.5 py-1 mt-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
-                  ${item.tipo}
-                </span>
-              </div>
-
-              <div class="sm:hidden">
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Almacén</span>
-                <span class="text-xs font-medium text-slate-300">📍 ${item.almacen}</span>
-              </div>
-
-              <div>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Fecha de Registro</span>
-                <span class="text-xs font-mono text-slate-300">${item.fecha}</span>
-              </div>
-            </div>
-
-            <!-- Descripción de Criterios / Motivo -->
-            <div>
-              <span class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Descripción / Criterios Fallidos:</span>
-              <p class="text-sm text-slate-300 bg-slate-900/80 p-4 rounded-xl border border-slate-800/80 whitespace-pre-line leading-relaxed">
-                ${item.descripcion}
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      `).join('');
+      tbody.innerHTML = html;
     }
 
-    // Función para mostrar / ocultar los detalles al hacer clic
-    function toggleDetails(index) {
-      const details = document.getElementById(`details-${index}`);
-      const icon = document.getElementById(`icon-${index}`);
-      
-      if (details.classList.contains('hidden')) {
-        details.classList.remove('hidden');
-        icon.classList.add('rotate-180');
-      } else {
-        details.classList.add('hidden');
-        icon.classList.remove('rotate-180');
-      }
+    function toggleRow(index) {
+      const detail = document.getElementById(`detail-${index}`);
+      detail.classList.toggle('hidden');
+    }
+
+    function updateCharts() {
+      if (mergedIncidents.length === 0) return;
+
+      const palette = colorPalettes[currentTheme].colors;
+
+      // 1. Data Almacén
+      const almacenCounts = {};
+      mergedIncidents.forEach(i => {
+        almacenCounts[i.almacen] = (almacenCounts[i.almacen] || 0) + 1;
+      });
+
+      if (chartAlmacenInstance) chartAlmacenInstance.destroy();
+      const ctx1 = document.getElementById('chartAlmacen').getContext('2d');
+      chartAlmacenInstance = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(almacenCounts),
+          datasets: [{
+            data: Object.values(almacenCounts),
+            backgroundColor: palette,
+            borderWidth: 2,
+            borderColor: '#05070a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 11 } }
+            }
+          }
+        }
+      });
+
+      // 2. Data Tipo
+      const tipoCounts = {};
+      mergedIncidents.forEach(i => {
+        tipoCounts[i.tipo] = (tipoCounts[i.tipo] || 0) + 1;
+      });
+
+      if (chartTipoInstance) chartTipoInstance.destroy();
+      const ctx2 = document.getElementById('chartTipo').getContext('2d');
+      chartTipoInstance = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(tipoCounts),
+          datasets: [{
+            data: Object.values(tipoCounts),
+            backgroundColor: palette.slice().reverse(),
+            borderWidth: 2,
+            borderColor: '#05070a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 11 } }
+            }
+          }
+        }
+      });
     }
 
     function populateDropdowns() {
-      const types = [...new Set(mergedIncidents.map(i => i.tipo))].filter(Boolean);
-      const selectType = document.getElementById('typeFilter');
-      selectType.innerHTML = '<option value="">Todos los tipos</option>';
-      types.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t;
-        opt.textContent = t;
-        selectType.appendChild(opt);
-      });
-
       const almacenes = [...new Set(mergedIncidents.map(i => i.almacen))].filter(Boolean);
       const selectAlmacen = document.getElementById('almacenFilter');
-      selectAlmacen.innerHTML = '<option value="">Todos los almacenes</option>';
+      selectAlmacen.innerHTML = '<option value="">Todos los Almacenes</option>';
       almacenes.forEach(a => {
         const opt = document.createElement('option');
         opt.value = a;
@@ -284,20 +464,17 @@
 
     function filterData() {
       const query = document.getElementById('searchInput').value.toLowerCase();
-      const selectedType = document.getElementById('typeFilter').value;
       const selectedAlmacen = document.getElementById('almacenFilter').value;
 
       const filtered = mergedIncidents.filter(item => {
-        const matchesQuery = String(item.guia).toLowerCase().includes(query) || 
-                             String(item.driver).toLowerCase().includes(query) ||
-                             String(item.descripcion).toLowerCase().includes(query) ||
-                             String(item.almacen).toLowerCase().includes(query);
-        const matchesType = !selectedType || item.tipo === selectedType;
+        const matchesQuery = item.guia.toLowerCase().includes(query) || 
+                             item.driver.toLowerCase().includes(query) ||
+                             item.descripcion.toLowerCase().includes(query);
         const matchesAlmacen = !selectedAlmacen || item.almacen === selectedAlmacen;
-        return matchesQuery && matchesType && matchesAlmacen;
+        return matchesQuery && matchesAlmacen;
       });
 
-      renderAccordion(filtered);
+      renderTable(filtered);
       updateKPIs(filtered);
     }
 
