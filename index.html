@@ -33,7 +33,6 @@
       box-shadow: 0 0 25px -5px var(--neon-glow);
     }
 
-    /* Scrollbar personalizada */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0a0e17; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
@@ -238,27 +237,43 @@
       }).filter(row => row.some(cell => cell !== ''));
     }
 
-    // Algoritmo Inteligente de Coincidencia de Nombres (Fuzzy Word Match)
+    // ALGORITMO FLEXIBLE DE COINCIDENCIAS
     function matchDriverAlmacen(driverRawName, driversList) {
       const targetClean = cleanText(driverRawName);
       if (!targetClean || targetClean === 'sin asignar') return 'SIN ASIGNAR';
 
-      const targetWords = targetClean.split(' ').filter(w => w.length > 2);
+      const targetWords = targetClean.split(' ').filter(w => w.length >= 3);
+
+      // 1. Coincidencia directa o contenedora
+      for (let item of driversList) {
+        if (targetClean === item.cleanName || targetClean.includes(item.cleanName) || item.cleanName.includes(targetClean)) {
+          return item.almacen;
+        }
+      }
+
+      // 2. Coincidencia por palabras clave compartidas
+      let bestMatch = null;
+      let maxScore = 0;
 
       for (let item of driversList) {
-        const itemClean = item.cleanName;
-        // 1. Coincidencia Exacta
-        if (targetClean === itemClean || targetClean.includes(itemClean) || itemClean.includes(targetClean)) {
-          return item.almacen;
-        }
+        const itemWords = item.cleanName.split(' ').filter(w => w.length >= 3);
+        let score = 0;
 
-        // 2. Coincidencia por palabras compartidas (al menos 2 palabras iguales, ej: "Gabriela" y "Duran")
-        const itemWords = itemClean.split(' ').filter(w => w.length > 2);
-        const sharedWords = targetWords.filter(w => itemWords.includes(w));
+        targetWords.forEach(tw => {
+          itemWords.forEach(iw => {
+            if (tw === iw) score += 3;
+            else if (tw.startsWith(iw) || iw.startsWith(tw)) score += 2;
+          });
+        });
 
-        if (sharedWords.length >= 2 || (targetWords.length === 1 && sharedWords.length === 1)) {
-          return item.almacen;
+        if (score > maxScore) {
+          maxScore = score;
+          bestMatch = item.almacen;
         }
+      }
+
+      if (maxScore >= 2 && bestMatch) {
+        return bestMatch;
       }
 
       return 'PENDIENTE DE ASIGNAR';
@@ -277,7 +292,7 @@
         const rowsGuias = parseCSV(resGuias);
         const rowsDrivers = parseCSV(resDrivers);
 
-        // Extraer lista de drivers dinámicamente escaneando todas las columnas
+        // Mapeo exhaustivo de drivers
         const driversList = [];
         rowsDrivers.forEach((row) => {
           let driverName = '';
@@ -301,7 +316,7 @@
           }
         });
 
-        // Filtrado de incidencias reales
+        // Filtrado y cruce de incidencias
         mergedIncidents = [];
         rowsGuias.forEach((row) => {
           const guia = row[0] ? row[0].trim() : '';
