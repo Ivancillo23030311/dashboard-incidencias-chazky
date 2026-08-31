@@ -1,321 +1,532 @@
-<!-- MÓDULO EJECUTIVO: TOP 5 DRIVERS - EVALUACIÓN Y ACCIÓN CORRECTIVA -->
-<div class="kpi-card-business">
-  <!-- ENCABEZADO DE NEGOCIOS -->
-  <div class="card-header-biz">
-    <div class="header-left">
-      <span class="badge-audit">AUDITORÍA OPERATIVA</span>
-      <h3>REPORTE DE INCIDENCIAS POR REPARTIDOR (TOP 5 CRÍTICO)</h3>
-      <p class="subtitle">Desglose de reincidencias operativas y plan de mitigación requerido para el proveedor.</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chazky Express Incidencias</title>
+  <style>
+    body {
+      background-color: #06090e;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 20px;
+    }
+
+    /* HEADER */
+    .dashboard-header {
+      background: #0d1117;
+      border: 1px solid #1f293d;
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo-box {
+      width: 48px;
+      height: 48px;
+      background: #161b26;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .badge-radar {
+      background: rgba(255, 0, 127, 0.15);
+      color: #ff007f;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .header-title-box h1 {
+      margin: 4px 0 0 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .header-title-box h1 span {
+      color: #ff007f;
+    }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .theme-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #161b26;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #232b3e;
+      font-size: 11px;
+      color: #8b949e;
+    }
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .select-custom, .search-input {
+      background: #161b26;
+      border: 1px solid #232b3e;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    /* TOP KPIS GRID */
+    .top-kpis-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .kpi-box {
+      background: #0d1117;
+      border: 1px solid #1f293d;
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+    }
+    .kpi-title {
+      color: #8b949e;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .kpi-sub {
+      color: #6e7681;
+      font-size: 11px;
+    }
+    .kpi-icon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 18px;
+    }
+
+    /* CHARTS GRID */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .chart-card {
+      background: #0d1117;
+      border: 1px solid #1f293d;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .chart-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .dot-pink { background: #ff007f; }
+    .dot-yellow { background: #ffcc00; }
+    .chart-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .chart-tag {
+      color: #8b949e;
+      font-size: 11px;
+    }
+
+    /* NUEVO MÓDULO: TOP 5 DRIVERS & ACTUAR */
+    .kpi-card-business {
+      background: #0d1117;
+      border: 1px solid #1f293d;
+      border-radius: 12px;
+      padding: 24px;
+      color: #e2e8f0;
+    }
+    .card-header-biz {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid #1a2332;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .badge-audit {
+      background: rgba(0, 191, 255, 0.1);
+      color: #00bfff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 191, 255, 0.3);
+    }
+    .card-header-biz h3 {
+      margin: 8px 0 4px 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .card-header-biz .subtitle {
+      margin: 0;
+      font-size: 12px;
+      color: #8b949e;
+    }
+    .sla-badge {
+      background: rgba(255, 0, 127, 0.1);
+      color: #ff007f;
+      border: 1px solid rgba(255, 0, 127, 0.3);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+    .table-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .table-header-row {
+      display: grid;
+      grid-template-columns: 2fr 2.5fr 1.2fr 2.8fr;
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #6e7681;
+    }
+    .table-row {
+      display: grid;
+      grid-template-columns: 2fr 2.5fr 1.2fr 2.8fr;
+      align-items: center;
+      background: #161b26;
+      border: 1px solid #232b3e;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .col-rank { display: flex; align-items: center; gap: 12px; }
+    .rank-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .rank-1 { background: #ff007f; color: #fff; }
+    .rank-2 { background: #ff9900; color: #fff; }
+    .rank-3 { background: #ffcc00; color: #111; }
+    .rank-sub { background: #232b3e; color: #8b949e; }
+    .driver-info { display: flex; flex-direction: column; }
+    .driver-name { color: #ffffff; font-weight: 600; font-size: 12px; }
+    .driver-id { color: #6e7681; font-size: 10px; }
+    .col-driver { display: flex; flex-direction: column; gap: 2px; }
+    .incident-main { color: #e2e8f0; font-size: 12px; font-weight: 600; }
+    .incident-detail { color: #8b949e; font-size: 10px; }
+    .col-volume { padding-right: 15px; }
+    .metric-block { display: flex; flex-direction: column; gap: 4px; }
+    .metric-val { font-weight: 800; font-size: 13px; }
+    .metric-val small { font-size: 10px; font-weight: 400; color: #8b949e; }
+    .metric-val.red { color: #ff007f; }
+    .metric-val.orange { color: #ff9900; }
+    .metric-val.yellow { color: #ffcc00; }
+    .metric-val.blue { color: #00bfff; }
+    .bar-bg { background: #0d1117; height: 4px; border-radius: 2px; overflow: hidden; width: 100%; }
+    .bar-fill { height: 100%; border-radius: 2px; }
+    .bar-red { background: #ff007f; }
+    .bar-orange { background: #ff9900; }
+    .bar-yellow { background: #ffcc00; }
+    .bar-blue { background: #00bfff; }
+    .action-box {
+      display: flex;
+      flex-direction: column;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border-left: 3px solid;
+    }
+    .action-tag { font-weight: 800; font-size: 10px; margin-bottom: 2px; }
+    .action-desc { font-size: 10px; line-height: 1.3; color: #cbd5e1; }
+    .action-block { background: rgba(255, 0, 127, 0.05); border-color: #ff007f; }
+    .action-block .action-tag { color: #ff007f; }
+    .action-warn { background: rgba(255, 153, 0, 0.05); border-color: #ff9900; }
+    .action-warn .action-tag { color: #ff9900; }
+    .action-notice { background: rgba(255, 204, 0, 0.05); border-color: #ffcc00; }
+    .action-notice .action-tag { color: #ffcc00; }
+    .action-monitor { background: rgba(0, 191, 255, 0.05); border-color: #00bfff; }
+    .action-monitor .action-tag { color: #00bfff; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER ORIGINAL -->
+  <div class="dashboard-header">
+    <div class="header-title-box">
+      <div class="logo-box">📦</div>
+      <div>
+        <span class="badge-radar">● Live Logistics Radar</span>
+        <h1>CHAZKY <span>EXPRESS</span> INCIDENCIAS</h1>
+      </div>
     </div>
-    <div class="header-right">
-      <span class="sla-badge">SLAs AFECTADOS: EVIDENCIAS & ENTREGAS</span>
+    <div class="header-controls">
+      <div class="theme-selector">
+        <span>TEMAS:</span>
+        <span class="color-dot" style="background:#ff9900;"></span>
+        <span class="color-dot" style="background:#00f0ff;"></span>
+        <span class="color-dot" style="background:#ff007f;"></span>
+        <span class="color-dot" style="background:#007bff;"></span>
+        <span class="color-dot" style="background:#ccff00;"></span>
+        <span class="color-dot" style="background:#a000ff;"></span>
+      </div>
+      <select class="select-custom"><option>Todas las Incidencias</option></select>
+      <input type="text" class="search-input" placeholder="🔍 Buscar guía o driver...">
+      <select class="select-custom"><option>Todos los Almacenes</option></select>
     </div>
   </div>
 
-  <!-- TABLA DE KPIs Y ACTUAR -->
-  <div class="table-container">
-    <div class="table-header-row">
-      <span class="col-rank">RANK / DRIVER</span>
-      <span class="col-driver">DETALLE TÉCNICO DE FALLA</span>
-      <span class="col-volume">VOLUMEN AFECTADO</span>
-      <span class="col-action">ACCIÓN CORRECTIVA REQUERIDA (ACTUAR)</span>
+  <!-- METRICAS KPI ORIGINALES -->
+  <div class="top-kpis-grid">
+    <div class="kpi-box">
+      <div class="kpi-title">TOTAL PAQUETES / GUÍAS</div>
+      <div class="kpi-value">255</div>
+      <div class="kpi-sub">Registrados en la flota activa</div>
+      <span class="kpi-icon">🚚</span>
     </div>
-
-    <!-- DRIVER 1 -->
-    <div class="table-row row-critical">
-      <div class="col-rank">
-        <span class="rank-badge rank-1">01</span>
-        <div class="driver-info">
-          <span class="driver-name">Hector Roberto Yorto Gachus</span>
-          <span class="driver-id">ID: HRY-GACHUS</span>
-        </div>
-      </div>
-      <div class="col-driver">
-        <span class="incident-main">Autorización con tercero incorrecta</span>
-        <span class="incident-detail">Falta evidencia en WhatsApp / Criterio Crítico</span>
-      </div>
-      <div class="col-volume">
-        <div class="metric-block">
-          <span class="metric-val red">8 <small>casos</small></span>
-          <div class="bar-bg"><div class="bar-fill bar-red" style="width: 100%;"></div></div>
-        </div>
-      </div>
-      <div class="col-action">
-        <div class="action-box action-block">
-          <span class="action-tag">BLOQUEO TEMPORAL</span>
-          <span class="action-desc">Baja preventiva de rutas de alto valor + Recapacitación obligatoria de protocolo.</span>
-        </div>
-      </div>
+    <div class="kpi-box">
+      <div class="kpi-title">DRIVERS INVOLUCRADOS</div>
+      <div class="kpi-value">16</div>
+      <div class="kpi-sub">Repartidores con reporte</div>
+      <span class="kpi-icon">👷</span>
     </div>
-
-    <!-- DRIVER 2 -->
-    <div class="table-row row-high">
-      <div class="col-rank">
-        <span class="rank-badge rank-2">02</span>
-        <div class="driver-info">
-          <span class="driver-name">Lilian Tlalpa M</span>
-          <span class="driver-id">ID: LTLALPA-M</span>
-        </div>
-      </div>
-      <div class="col-driver">
-        <span class="incident-main">Evidencia de entrega incorrecta</span>
-        <span class="incident-detail">Falta foto receptor / Fachada sin número visible</span>
-      </div>
-      <div class="col-volume">
-        <div class="metric-block">
-          <span class="metric-val orange">6 <small>casos</small></span>
-          <div class="bar-bg"><div class="bar-fill bar-orange" style="width: 75%;"></div></div>
-        </div>
-      </div>
-      <div class="col-action">
-        <div class="action-box action-warn">
-          <span class="action-tag">AUDITORÍA AL 100%</span>
-          <span class="action-desc">Validación obligatoria de PODs en App antes de permitir cierre de ruta.</span>
-        </div>
-      </div>
+    <div class="kpi-box">
+      <div class="kpi-title">ESTADO DE CONEXIÓN</div>
+      <div class="kpi-value" style="color:#00ff88; font-size:18px; margin-top:8px;">● ONLINE (SINCRO OK)</div>
+      <div class="kpi-sub">Conexión directa a Google Sheets</div>
+      <span class="kpi-icon">⚡</span>
     </div>
-
-    <!-- DRIVER 3 -->
-    <div class="table-row row-medium">
-      <div class="col-rank">
-        <span class="rank-badge rank-3">03</span>
-        <div class="driver-info">
-          <span class="driver-name">Diego Armando Hernandez Patraca</span>
-          <span class="driver-id">ID: DHERNANDEZ-P</span>
-        </div>
-      </div>
-      <div class="col-driver">
-        <span class="incident-main">Notificación al cliente omitida</span>
-        <span class="incident-detail">Sin registro de mensaje previo al arribo</span>
-      </div>
-      <div class="col-volume">
-        <div class="metric-block">
-          <span class="metric-val yellow">5 <small>casos</small></span>
-          <div class="bar-bg"><div class="bar-fill bar-yellow" style="width: 62.5%;"></div></div>
-        </div>
-      </div>
-      <div class="col-action">
-        <div class="action-box action-notice">
-          <span class="action-tag">Amonestación Operativa</span>
-          <span class="action-desc">Notificación formal a Supervisor de Flota / Revisión de logs telefónicos.</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- DRIVER 4 -->
-    <div class="table-row row-standard">
-      <div class="col-rank">
-        <span class="rank-badge rank-sub">04</span>
-        <div class="driver-info">
-          <span class="driver-name">Lopez Dominguez Alfonso</span>
-          <span class="driver-id">ID: ALOPEZ-DOM</span>
-        </div>
-      </div>
-      <div class="col-driver">
-        <span class="incident-main">Autorización con tercero incorrecta</span>
-        <span class="incident-detail">Inconsistencia en notas de entrega</span>
-      </div>
-      <div class="col-volume">
-        <div class="metric-block">
-          <span class="metric-val blue">4 <small>casos</small></span>
-          <div class="bar-bg"><div class="bar-fill bar-blue" style="width: 50%;"></div></div>
-        </div>
-      </div>
-      <div class="col-action">
-        <div class="action-box action-monitor">
-          <span class="action-tag">PLAN DE SEGUIMIENTO</span>
-          <span class="action-desc">Monitoreo semanal de efectividad y calidad en entrega.</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- DRIVER 5 -->
-    <div class="table-row row-standard">
-      <div class="col-rank">
-        <span class="rank-badge rank-sub">05</span>
-        <div class="driver-info">
-          <span class="driver-name">Antonio Contreras Rodriguez</span>
-          <span class="driver-id">ID: ACONTRERAS-R</span>
-        </div>
-      </div>
-      <div class="col-driver">
-        <span class="incident-main">Foto de receptor no conforme</span>
-        <span class="incident-detail">Imágenes borrosas o sin validez legal</span>
-      </div>
-      <div class="col-volume">
-        <div class="metric-block">
-          <span class="metric-val blue">3 <small>casos</small></span>
-          <div class="bar-bg"><div class="bar-fill bar-blue" style="width: 37.5%;"></div></div>
-        </div>
-      </div>
-      <div class="col-action">
-        <div class="action-box action-monitor">
-          <span class="action-tag">PLAN DE SEGUIMIENTO</span>
-          <span class="action-desc">Monitoreo semanal de efectividad y calidad en entrega.</span>
-        </div>
-      </div>
-    </div>
-
   </div>
-</div>
 
-<style>
-  .kpi-card-business {
-    background: #0b0e14;
-    border: 1px solid #1a2332;
-    border-radius: 10px;
-    padding: 24px;
-    color: #e2e8f0;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  }
+  <!-- GRAFICAS ORIGINALES -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title-box">
+          <span class="dot-indicator dot-pink"></span>
+          <span class="chart-title">DISTRIBUCIÓN POR ALMACÉN / HUB</span>
+        </div>
+        <span class="chart-tag">PASTEL NEÓN</span>
+      </div>
+      <!-- Espacio reservado para tu gráfica de Almacenes -->
+      <div style="height: 180px; display:flex; align-items:center; justify-content:center; color:#8b949e;">
+        [Gráfica Toreo / Sur]
+      </div>
+    </div>
 
-  /* Header */
-  .card-header-biz {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px solid #1a2332;
-    padding-bottom: 16px;
-    margin-bottom: 20px;
-  }
-  .badge-audit {
-    background: rgba(0, 191, 255, 0.1);
-    color: #00bfff;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    border: 1px solid rgba(0, 191, 255, 0.3);
-  }
-  .card-header-biz h3 {
-    margin: 8px 0 4px 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.5px;
-  }
-  .card-header-biz .subtitle {
-    margin: 0;
-    font-size: 12px;
-    color: #8b949e;
-  }
-  .sla-badge {
-    background: rgba(255, 0, 127, 0.1);
-    color: #ff007f;
-    border: 1px solid rgba(255, 0, 127, 0.3);
-    font-size: 11px;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 6px;
-  }
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title-box">
+          <span class="dot-indicator dot-yellow"></span>
+          <span class="chart-title">TIPOS DE INCIDENCIAS</span>
+        </div>
+        <span class="chart-tag">PASTEL NEÓN</span>
+      </div>
+      <!-- Espacio reservado para tu gráfica de Tipos de Incidencias -->
+      <div style="height: 180px; display:flex; align-items:center; justify-content:center; color:#8b949e;">
+        [Gráfica Entregas / Evidencias]
+      </div>
+    </div>
+  </div>
 
-  /* Grid Layout / Table Structure */
-  .table-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .table-header-row {
-    display: grid;
-    grid-template-columns: 2.2fr 2.5fr 1.5fr 3fr;
-    padding: 8px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #6e7681;
-    letter-spacing: 0.5px;
-  }
-  .table-row {
-    display: grid;
-    grid-template-columns: 2.2fr 2.5fr 1.5fr 3fr;
-    align-items: center;
-    background: #121824;
-    border: 1px solid #1e2738;
-    border-radius: 8px;
-    padding: 12px 16px;
-  }
+  <!-- NUEVA SECCIÓN DE AUDITORÍA Y ACTUAR (TOP 5 DRIVERS) -->
+  <div class="kpi-card-business">
+    <div class="card-header-biz">
+      <div>
+        <span class="badge-audit">AUDITORÍA OPERATIVA</span>
+        <h3>REPORTE DE INCIDENCIAS POR REPARTIDOR (TOP 5 CRÍTICO)</h3>
+        <p class="subtitle">Desglose de reincidencias operativas y plan de mitigación requerido para el proveedor.</p>
+      </div>
+      <div>
+        <span class="sla-badge">SLAs AFECTADOS: EVIDENCIAS & ENTREGAS</span>
+      </div>
+    </div>
 
-  /* Rank & Driver Column */
-  .col-rank { display: flex; align-items: center; gap: 12px; }
-  .rank-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 800;
-  }
-  .rank-1 { background: #ff007f; color: #fff; }
-  .rank-2 { background: #ff9900; color: #fff; }
-  .rank-3 { background: #ffcc00; color: #111; }
-  .rank-sub { background: #1f293d; color: #8b949e; }
+    <div class="table-container">
+      <div class="table-header-row">
+        <span>RANK / DRIVER</span>
+        <span>DETALLE TÉCNICO DE FALLA</span>
+        <span>VOLUMEN AFECTADO</span>
+        <span>ACCIÓN CORRECTIVA REQUERIDA (ACTUAR)</span>
+      </div>
 
-  .driver-info { display: flex; flex-direction: column; }
-  .driver-name { color: #ffffff; font-weight: 600; font-size: 13px; }
-  .driver-id { color: #6e7681; font-size: 10px; font-weight: 600; }
+      <!-- Driver 1 -->
+      <div class="table-row">
+        <div class="col-rank">
+          <span class="rank-badge rank-1">01</span>
+          <div class="driver-info">
+            <span class="driver-name">Hector Roberto Yorto Gachus</span>
+            <span class="driver-id">ID: HRY-GACHUS</span>
+          </div>
+        </div>
+        <div class="col-driver">
+          <span class="incident-main">Autorización con tercero incorrecta</span>
+          <span class="incident-detail">Falta evidencia en WhatsApp / Criterio Crítico</span>
+        </div>
+        <div class="col-volume">
+          <div class="metric-block">
+            <span class="metric-val red">8 <small>casos</small></span>
+            <div class="bar-bg"><div class="bar-fill bar-red" style="width: 100%;"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="action-box action-block">
+            <span class="action-tag">BLOQUEO TEMPORAL</span>
+            <span class="action-desc">Baja preventiva de rutas de alto valor + Recapacitación obligatoria de protocolo.</span>
+          </div>
+        </div>
+      </div>
 
-  /* Incident Detail Column */
-  .col-driver { display: flex; flex-direction: column; gap: 2px; }
-  .incident-main { color: #e2e8f0; font-size: 12px; font-weight: 600; }
-  .incident-detail { color: #8b949e; font-size: 11px; }
+      <!-- Driver 2 -->
+      <div class="table-row">
+        <div class="col-rank">
+          <span class="rank-badge rank-2">02</span>
+          <div class="driver-info">
+            <span class="driver-name">Lilian Tlalpa M</span>
+            <span class="driver-id">ID: LTLALPA-M</span>
+          </div>
+        </div>
+        <div class="col-driver">
+          <span class="incident-main">Evidencia de entrega incorrecta</span>
+          <span class="incident-detail">Falta foto receptor / Fachada sin número visible</span>
+        </div>
+        <div class="col-volume">
+          <div class="metric-block">
+            <span class="metric-val orange">6 <small>casos</small></span>
+            <div class="bar-bg"><div class="bar-fill bar-orange" style="width: 75%;"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="action-box action-warn">
+            <span class="action-tag">AUDITORÍA AL 100%</span>
+            <span class="action-desc">Validación obligatoria de PODs en App antes de permitir cierre de ruta.</span>
+          </div>
+        </div>
+      </div>
 
-  /* Volume & Progress Bar Column */
-  .col-volume { padding-right: 20px; }
-  .metric-block { display: flex; flex-direction: column; gap: 4px; }
-  .metric-val { font-weight: 800; font-size: 14px; }
-  .metric-val small { font-size: 10px; font-weight: 400; color: #8b949e; }
-  .metric-val.red { color: #ff007f; }
-  .metric-val.orange { color: #ff9900; }
-  .metric-val.yellow { color: #ffcc00; }
-  .metric-val.blue { color: #00bfff; }
+      <!-- Driver 3 -->
+      <div class="table-row">
+        <div class="col-rank">
+          <span class="rank-badge rank-3">03</span>
+          <div class="driver-info">
+            <span class="driver-name">Diego Armando Hernandez Patraca</span>
+            <span class="driver-id">ID: DHERNANDEZ-P</span>
+          </div>
+        </div>
+        <div class="col-driver">
+          <span class="incident-main">Notificación al cliente omitida</span>
+          <span class="incident-detail">Sin registro de mensaje previo al arribo</span>
+        </div>
+        <div class="col-volume">
+          <div class="metric-block">
+            <span class="metric-val yellow">5 <small>casos</small></span>
+            <div class="bar-bg"><div class="bar-fill bar-yellow" style="width: 62.5%;"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="action-box action-notice">
+            <span class="action-tag">AMONESTACIÓN OPERATIVA</span>
+            <span class="action-desc">Notificación formal a Supervisor de Flota / Revisión de logs telefónicos.</span>
+          </div>
+        </div>
+      </div>
 
-  .bar-bg { background: #0d1117; height: 5px; border-radius: 3px; overflow: hidden; width: 100%; }
-  .bar-fill { height: 100%; border-radius: 3px; }
-  .bar-red { background: #ff007f; }
-  .bar-orange { background: #ff9900; }
-  .bar-yellow { background: #ffcc00; }
-  .bar-blue { background: #00bfff; }
+      <!-- Driver 4 -->
+      <div class="table-row">
+        <div class="col-rank">
+          <span class="rank-badge rank-sub">04</span>
+          <div class="driver-info">
+            <span class="driver-name">Lopez Dominguez Alfonso</span>
+            <span class="driver-id">ID: ALOPEZ-DOM</span>
+          </div>
+        </div>
+        <div class="col-driver">
+          <span class="incident-main">Autorización con tercero incorrecta</span>
+          <span class="incident-detail">Inconsistencia en notas de entrega</span>
+        </div>
+        <div class="col-volume">
+          <div class="metric-block">
+            <span class="metric-val blue">4 <small>casos</small></span>
+            <div class="bar-bg"><div class="bar-fill bar-blue" style="width: 50%;"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="action-box action-monitor">
+            <span class="action-tag">PLAN DE SEGUIMIENTO</span>
+            <span class="action-desc">Monitoreo semanal de efectividad y calidad en entrega.</span>
+          </div>
+        </div>
+      </div>
 
-  /* Action Column (El Actuar) */
-  .action-box {
-    display: flex;
-    flex-direction: column;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border-left: 3px solid;
-  }
-  .action-tag { font-weight: 800; font-size: 10px; letter-spacing: 0.5px; margin-bottom: 2px; }
-  .action-desc { font-size: 11px; line-height: 1.3; }
+      <!-- Driver 5 -->
+      <div class="table-row">
+        <div class="col-rank">
+          <span class="rank-badge rank-sub">05</span>
+          <div class="driver-info">
+            <span class="driver-name">Antonio Contreras Rodriguez</span>
+            <span class="driver-id">ID: ACONTRERAS-R</span>
+          </div>
+        </div>
+        <div class="col-driver">
+          <span class="incident-main">Foto de receptor no conforme</span>
+          <span class="incident-detail">Imágenes borrosas o sin validez legal</span>
+        </div>
+        <div class="col-volume">
+          <div class="metric-block">
+            <span class="metric-val blue">3 <small>casos</small></span>
+            <div class="bar-bg"><div class="bar-fill bar-blue" style="width: 37.5%;"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="action-box action-monitor">
+            <span class="action-tag">PLAN DE SEGUIMIENTO</span>
+            <span class="action-desc">Monitoreo semanal de efectividad y calidad en entrega.</span>
+          </div>
+        </div>
+      </div>
 
-  /* Variantes de Acción por Gravedad */
-  .action-block {
-    background: rgba(255, 0, 127, 0.05);
-    border-color: #ff007f;
-    color: #e2e8f0;
-  }
-  .action-block .action-tag { color: #ff007f; }
+    </div>
+  </div>
 
-  .action-warn {
-    background: rgba(255, 153, 0, 0.05);
-    border-color: #ff9900;
-    color: #e2e8f0;
-  }
-  .action-warn .action-tag { color: #ff9900; }
-
-  .action-notice {
-    background: rgba(255, 204, 0, 0.05);
-    border-color: #ffcc00;
-    color: #e2e8f0;
-  }
-  .action-notice .action-tag { color: #ffcc00; }
-
-  .action-monitor {
-    background: rgba(0, 191, 255, 0.05);
-    border-color: #00bfff;
-    color: #e2e8f0;
-  }
-  .action-monitor .action-tag { color: #00bfff; }
-</style>
+</body>
+</html>
