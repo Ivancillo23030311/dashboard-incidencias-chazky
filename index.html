@@ -121,13 +121,14 @@
       </div>
     </div>
 
-    <!-- GRÁFICAS -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- GRÁFICAS Y TOP 5 DRIVERS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Chart Almacén -->
       <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full neon-bg-primary" id="dotChart1"></span>
-            Distribución por Almacén / Hub
+            Distribución por Almacén
           </h3>
           <span class="text-xs text-slate-500 font-tech">PASTEL NEÓN</span>
         </div>
@@ -136,6 +137,7 @@
         </div>
       </div>
 
+      <!-- Chart Tipo de Incidencia -->
       <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
@@ -146,6 +148,21 @@
         </div>
         <div class="relative h-64 flex items-center justify-center">
           <canvas id="chartTipo"></canvas>
+        </div>
+      </div>
+
+      <!-- APARTADO NUEVO: TOP 5 DRIVERS -->
+      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            Top 5 Drivers Críticos
+          </h3>
+          <span class="text-xs text-slate-500 font-tech">MÁS REPORTADOS</span>
+        </div>
+        
+        <div id="topDriversContainer" class="space-y-3.5 my-auto">
+          <!-- Render dinámico desde JS -->
         </div>
       </div>
     </div>
@@ -208,6 +225,7 @@
       if (ambient) ambient.style.backgroundColor = theme.primary;
 
       updateCharts();
+      updateTopDrivers(mergedIncidents);
     }
 
     function cleanText(str) {
@@ -317,11 +335,8 @@
         mergedIncidents = [];
 
         rowsGuias.forEach((row, rowIndex) => {
-          // Omitir fila de encabezados
           if (rowIndex === 0) return;
 
-          // Mapeo directo por posición de columna:
-          // A (0) = Guía | B (1) = Driver | C (2) = Fecha | D (3) = Tipo de incidencia
           const guia = row[0] ? row[0].trim() : '';
           const driverRaw = row[1] ? row[1].trim() : 'Sin Asignar';
           const fecha = row[2] ? row[2].trim() : 'N/A';
@@ -357,11 +372,68 @@
         renderTable(mergedIncidents);
         updateKPIs(mergedIncidents);
         updateCharts();
+        updateTopDrivers(mergedIncidents);
 
       } catch (err) {
         console.error(err);
         showError('Error al sincronizar datos.');
       }
+    }
+
+    function updateTopDrivers(items) {
+      const container = document.getElementById('topDriversContainer');
+      
+      const counts = {};
+      items.forEach(i => {
+        if (i.driver && i.driver !== 'Sin Asignar') {
+          counts[i.driver] = (counts[i.driver] || 0) + 1;
+        }
+      });
+
+      const top5 = Object.entries(counts)
+        .map(([driver, count]) => ({ driver, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      if (top5.length === 0) {
+        container.innerHTML = `<div class="text-slate-500 text-xs text-center py-6">Sin datos de conductores.</div>`;
+        return;
+      }
+
+      const maxCount = top5[0].count;
+      let html = '';
+
+      top5.forEach((item, index) => {
+        const percentage = Math.round((item.count / maxCount) * 100);
+        
+        let badgeColor = 'bg-slate-800 text-slate-400 border-slate-700';
+        if (index === 0) badgeColor = 'bg-red-500/20 text-red-400 border-red-500/40 font-bold';
+        else if (index === 1) badgeColor = 'bg-amber-500/20 text-amber-400 border-amber-500/40';
+        else if (index === 2) badgeColor = 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
+
+        html += `
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center text-xs">
+              <div class="flex items-center gap-2 truncate max-w-[70%]">
+                <span class="w-5 h-5 rounded-full border flex items-center justify-center text-[10px] font-tech font-bold ${badgeColor}">
+                  #${index + 1}
+                </span>
+                <span class="font-medium text-slate-200 truncate">${item.driver}</span>
+              </div>
+              <span class="font-tech font-bold text-slate-300 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800 text-[11px]">
+                ${item.count} ${item.count === 1 ? 'incidencia' : 'incidencias'}
+              </span>
+            </div>
+            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800/60">
+              <div class="h-full rounded-full transition-all duration-500" 
+                   style="width: ${percentage}%; background-color: var(--neon-primary)">
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
     }
 
     function showError(msg) {
@@ -524,6 +596,7 @@
 
       renderTable(filtered);
       updateKPIs(filtered);
+      updateTopDrivers(filtered);
     }
 
     function updateKPIs(items) {
