@@ -2,321 +2,537 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Chazky Express Incidencias Dashboard</title>
-  <!-- Chart.js CDN para gráficas neón -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chazky Control Tower — Incidencias Flotilla</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
   <style>
-    body {
-      background-color: #06090e;
-      color: #ffffff;
-      font-family: system-ui, -apple-system, sans-serif;
-      margin: 20px;
+    :root {
+      --neon-primary: #ff0055;
+      --neon-secondary: #ffaa00;
+      --neon-glow: rgba(255, 0, 85, 0.35);
     }
 
-    /* HEADER */
-    .dashboard-header {
-      background: #0d1117;
-      border: 1px solid #1f293d;
-      border-radius: 16px;
-      padding: 18px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .header-title-box {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .logo-box {
-      width: 44px;
-      height: 44px;
-      background: #161b26;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-    }
-    .badge-radar {
-      background: rgba(255, 0, 127, 0.15);
-      color: #ff007f;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .header-title-box h1 {
-      margin: 4px 0 0 0;
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-    .header-title-box h1 span { color: #ff007f; }
-    
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .theme-selector {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #161b26;
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid #232b3e;
-      font-size: 11px;
-      color: #8b949e;
-    }
-    .color-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .select-custom, .search-input {
-      background: #161b26;
-      border: 1px solid #232b3e;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      outline: none;
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: #05070a;
     }
 
-    /* TOP KPIS GRID (3 CARDS SUPERIORES) */
-    .top-kpis-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .kpi-box {
-      background: #0d1117;
-      border: 1px solid #1f293d;
-      border-radius: 12px;
-      padding: 20px;
-      position: relative;
-    }
-    .kpi-title {
-      color: #8b949e;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-    }
-    .kpi-value {
-      font-size: 32px;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-    .kpi-sub { color: #6e7681; font-size: 11px; }
-    .kpi-icon {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 18px;
+    .font-tech {
+      font-family: 'Space Grotesk', sans-serif;
     }
 
-    /* CHARTS GRID (LAS 2 GRÁFICAS ORIGINALES) */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
+    .neon-text-primary { color: var(--neon-primary); }
+    .neon-bg-primary { background-color: var(--neon-primary); }
+
+    .glow-box {
+      box-shadow: 0 0 25px -5px var(--neon-glow);
     }
-    .chart-card {
-      background: #0d1117;
-      border: 1px solid #1f293d;
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .chart-title-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .dot-indicator { width: 8px; height: 8px; border-radius: 50%; }
-    .dot-pink { background: #ff007f; }
-    .dot-yellow { background: #ffcc00; }
-    .chart-title { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
-    .chart-tag { color: #8b949e; font-size: 11px; }
-    
-    .chart-container {
-      position: relative;
-      height: 250px;
-      width: 100%;
-    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0e17; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-primary); }
   </style>
 </head>
-<body>
+<body class="text-slate-100 min-h-screen p-3 md:p-6 pb-12">
 
-  <!-- ENCABEZADO -->
-  <div class="dashboard-header">
-    <div class="header-title-box">
-      <div class="logo-box">📦</div>
-      <div>
-        <span class="badge-radar">● Live Logistics Radar</span>
-        <h1>CHAZKY <span>EXPRESS</span> INCIDENCIAS</h1>
-      </div>
-    </div>
-    <div class="header-controls">
-      <div class="theme-selector">
-        <span>TEMAS:</span>
-        <span class="color-dot" style="background:#ff9900;"></span>
-        <span class="color-dot" style="background:#00f0ff;"></span>
-        <span class="color-dot" style="background:#ff007f;"></span>
-        <span class="color-dot" style="background:#007bff;"></span>
-        <span class="color-dot" style="background:#ccff00;"></span>
-      </div>
-      <select class="select-custom"><option>Todas las Incidencias</option></select>
-      <input type="text" class="search-input" placeholder="🔍 Buscar guía o driver...">
-      <select class="select-custom"><option>Todos los Almacenes</option></select>
-    </div>
-  </div>
+  <div class="max-w-7xl mx-auto space-y-6">
 
-  <!-- TARJETAS SUPERIORES DE KPI -->
-  <div class="top-kpis-grid">
-    <div class="kpi-box">
-      <div class="kpi-title">TOTAL PAQUETES / GUÍAS</div>
-      <div class="kpi-value">255</div>
-      <div class="kpi-sub">Registrados en la flota activa</div>
-      <span class="kpi-icon">🚚</span>
-    </div>
-    <div class="kpi-box">
-      <div class="kpi-title">DRIVERS INVOLUCRADOS</div>
-      <div class="kpi-value">16</div>
-      <div class="kpi-sub">Repartidores con reporte</div>
-      <span class="kpi-icon">👷</span>
-    </div>
-    <div class="kpi-box">
-      <div class="kpi-title">ESTADO DE CONEXIÓN</div>
-      <div class="kpi-value" style="color:#00ff88; font-size:18px; margin-top:8px;">● ONLINE (SINCRO OK)</div>
-      <div class="kpi-sub">Conexión directa a Google Sheets</div>
-      <span class="kpi-icon">⚡</span>
-    </div>
-  </div>
+    <!-- HEADER / BARRA SUPERIOR -->
+    <header class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 md:p-6 backdrop-blur-xl relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 glow-box">
+      <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-30 transition-all duration-500" id="ambientGlow" style="background-color: var(--neon-primary)"></div>
 
-  <!-- SECCIÓN DE GRÁFICAS PRINCIPALES -->
-  <div class="charts-grid">
-    
-    <!-- GRÁFICA 1: DRIVERS CON MÁS INCIDENCIAS (PEORES REPARTIDORES) -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title-box">
-          <span class="dot-indicator dot-pink"></span>
-          <span class="chart-title">CONCENTRACIÓN DE INCIDENCIAS POR DRIVER</span>
+      <div class="relative z-10">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 text-2xl">
+            📦
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-red-500/10 text-red-400 border border-red-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                LIVE LOGISTICS RADAR
+              </span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold font-tech tracking-tight text-white mt-1">
+              CHAZKY <span class="neon-text-primary" id="titleHighlight">EXPRESS</span> INCIDENCIAS
+            </h1>
+          </div>
         </div>
-        <span class="chart-tag" style="color:#ff007f; font-weight:bold;">TOP REINCIDENTES</span>
       </div>
-      <div class="chart-container">
-        <canvas id="driversChart"></canvas>
+
+      <div class="relative z-10 flex flex-wrap items-center gap-3">
+        <div class="bg-slate-950/90 p-2 border border-slate-800 rounded-2xl flex items-center gap-2">
+          <span class="text-[10px] font-bold text-slate-500 uppercase px-1 font-tech">TEMAS:</span>
+          <button onclick="changeTheme('warm')" class="w-6 h-6 rounded-full bg-gradient-to-r from-red-500 to-amber-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Warm Neon"></button>
+          <button onclick="changeTheme('cyber')" class="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 border-2 border-white/20 hover:scale-125 transition-transform" title="Cyber Lime"></button>
+          <button onclick="changeTheme('fuchsia')" class="w-6 h-6 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Pink"></button>
+          <button onclick="changeTheme('electric')" class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Electric Blue"></button>
+          <button onclick="changeTheme('toxic')" class="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-300 to-lime-500 border-2 border-white/20 hover:scale-125 transition-transform" title="Toxic Gold"></button>
+          <button onclick="changeTheme('purple')" class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 border-2 border-white/20 hover:scale-125 transition-transform" title="Deep Purple"></button>
+        </div>
+
+        <input type="text" id="searchInput" oninput="filterData()" placeholder="🔍 Buscar guía o driver..." 
+               class="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 w-full sm:w-44">
+        
+        <select id="almacenFilter" onchange="filterData()" 
+                class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none">
+          <option value="">Todos los Almacenes</option>
+        </select>
+
+        <select id="tipoFilter" onchange="filterData()" 
+                class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none">
+          <option value="">Todas las Incidencias</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- KPIS -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Total Paquetes / Guías</span>
+          <span class="text-xl">🚛</span>
+        </div>
+        <div id="totalKpi" class="text-4xl font-extrabold font-tech text-white mt-2">-</div>
+        <p class="text-[10px] text-slate-500 mt-1">Registrados en la flota activa</p>
+      </div>
+
+      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Drivers Involucrados</span>
+          <span class="text-xl">👷🏻‍♂️</span>
+        </div>
+        <div id="driversKpi" class="text-4xl font-extrabold font-tech neon-text-secondary mt-2">-</div>
+        <p class="text-[10px] text-slate-500 mt-1">Repartidores con reporte</p>
+      </div>
+
+      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">Estado de Conexión</span>
+          <span class="text-xl">⚡</span>
+        </div>
+        <div id="statusKpi" class="text-sm font-bold font-tech text-amber-400 mt-3">● SINCRO PENDIENTE</div>
+        <p class="text-[10px] text-slate-500 mt-1">Conexión directa a Google Sheets</p>
       </div>
     </div>
 
-    <!-- GRÁFICA 2: TIPOS DE INCIDENCIA -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title-box">
-          <span class="dot-indicator dot-yellow"></span>
-          <span class="chart-title">TIPOS DE INCIDENCIAS</span>
+    <!-- GRÁFICAS -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full neon-bg-primary" id="dotChart1"></span>
+            Distribución por Almacén / Hub
+          </h3>
+          <span class="text-xs text-slate-500 font-tech">PASTEL NEÓN</span>
         </div>
-        <span class="chart-tag">PASTEL NEÓN</span>
+        <div class="relative h-64 flex items-center justify-center">
+          <canvas id="chartAlmacen"></canvas>
+        </div>
       </div>
-      <div class="chart-container">
-        <canvas id="incidentsChart"></canvas>
+
+      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            Tipos de Incidencias
+          </h3>
+          <span class="text-xs text-slate-500 font-tech">PASTEL NEÓN</span>
+        </div>
+        <div class="relative h-64 flex items-center justify-center">
+          <canvas id="chartTipo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA RESTRUCTURADA -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-200 flex items-center gap-2">
+          <span>🏷️</span> Registro Clasificado de Incidencias
+        </h3>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-950/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-tech">
+              <th class="py-3.5 px-5">Código de Guía</th>
+              <th class="py-3.5 px-5">Driver / Asignado</th>
+              <th class="py-3.5 px-5">Almacén HUB</th>
+              <th class="py-3.5 px-5">Tipo de Incidencia</th>
+              <th class="py-3.5 px-5 text-right">Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="guiasTableBody" class="divide-y divide-slate-800/40 text-xs text-slate-300">
+            <tr>
+              <td colspan="5" class="py-12 text-center text-slate-500">Cargando radar de guías...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
   </div>
 
   <script>
-    // 1. GRAFICA DE DRIVERS CON MÁS INCIDENCIAS
-    const ctxDrivers = document.getElementById('driversChart').getContext('2d');
-    new Chart(ctxDrivers, {
-      type: 'doughnut',
-      data: {
-        labels: [
-          'Hector Yorto (8)',
-          'Lilian Tlalpa (6)',
-          'Diego Hernandez (5)',
-          'Alfonso Lopez (4)',
-          'Antonio Contreras (3)',
-          'Resto de Drivers (12)'
-        ],
-        datasets: [{
-          data: [8, 6, 5, 4, 3, 12],
-          backgroundColor: [
-            '#ff007f', // Magenta (Driver #1)
-            '#ff9900', // Naranja (Driver #2)
-            '#ffcc00', // Amarillo (Driver #3)
-            '#00bfff', // Azul (Driver #4)
-            '#a000ff', // Púrpura (Driver #5)
-            '#1f293d'  // Resto
-          ],
-          borderColor: '#0d1117',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: { color: '#8b949e', font: { size: 11 }, usePointStyle: true }
-          }
-        }
-      }
-    });
+    const SPREADSHEET_ID = '1YIeBaG0U-EP3Ic7pIzCFU_YKwh1rIkErV3hGSdxtBZE';
+    let mergedIncidents = [];
+    let chartAlmacenInstance = null;
+    let chartTipoInstance = null;
 
-    // 2. GRAFICA DE TIPOS DE INCIDENCIA
-    const ctxIncidents = document.getElementById('incidentsChart').getContext('2d');
-    new Chart(ctxIncidents, {
-      type: 'pie',
-      data: {
-        labels: [
-          'Autorización tercero',
-          'Evidencia incorrecta',
-          'Notificación WhatsApp',
-          'Foto de receptor',
-          'Otras fallas'
-        ],
-        datasets: [{
-          data: [12, 9, 7, 5, 4],
-          backgroundColor: [
-            '#ff007f',
-            '#00bfff',
-            '#ffcc00',
-            '#00ff88',
-            '#8b949e'
-          ],
-          borderColor: '#0d1117',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: { color: '#8b949e', font: { size: 11 }, usePointStyle: true }
-          }
+    const colorPalettes = {
+      warm: { primary: '#ff0055', secondary: '#ffaa00', colors: ['#ff0055', '#ffaa00', '#ccff00', '#ff3300', '#ff00aa', '#ffdd00'] },
+      cyber: { primary: '#10b981', secondary: '#06b6d4', colors: ['#10b981', '#06b6d4', '#84cc16', '#3b82f6', '#a855f7', '#22c55e'] },
+      fuchsia: { primary: '#d946ef', secondary: '#ec4899', colors: ['#d946ef', '#ec4899', '#f43f5e', '#8b5cf6', '#a855f7', '#fb7185'] },
+      electric: { primary: '#3b82f6', secondary: '#06b6d4', colors: ['#3b82f6', '#06b6d4', '#6366f1', '#60a5fa', '#38bdf8', '#818cf8'] },
+      toxic: { primary: '#facc15', secondary: '#84cc16', colors: ['#facc15', '#84cc16', '#10b981', '#f59e0b', '#eab308', '#06b6d4'] },
+      purple: { primary: '#a855f7', secondary: '#6366f1', colors: ['#a855f7', '#6366f1', '#ec4899', '#8b5cf6', '#d946ef', '#3b82f6'] }
+    };
+
+    let currentTheme = 'warm';
+
+    function changeTheme(themeKey) {
+      currentTheme = themeKey;
+      const theme = colorPalettes[themeKey];
+      document.documentElement.style.setProperty('--neon-primary', theme.primary);
+      document.documentElement.style.setProperty('--neon-secondary', theme.secondary);
+      document.documentElement.style.setProperty('--neon-glow', theme.primary + '55');
+
+      const ambient = document.getElementById('ambientGlow');
+      if (ambient) ambient.style.backgroundColor = theme.primary;
+
+      updateCharts();
+    }
+
+    function cleanText(str) {
+      if (!str) return '';
+      return str.toString()
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9 ]/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+    }
+
+    function parseCSV(text) {
+      const lines = text.split(/\r\n|\n/);
+      return lines.map(line => {
+        const row = [];
+        let insideQuote = false;
+        let entry = '';
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') insideQuote = !insideQuote;
+          else if (char === ',' && !insideQuote) {
+            row.push(entry.trim().replace(/^"|"$/g, ''));
+            entry = '';
+          } else entry += char;
+        }
+        row.push(entry.trim().replace(/^"|"$/g, ''));
+        return row;
+      }).filter(row => row.some(cell => cell !== ''));
+    }
+
+    function matchDriverAlmacen(driverRawName, driversList) {
+      const targetClean = cleanText(driverRawName);
+      if (!targetClean || targetClean === 'sin asignar') return 'SIN ASIGNAR';
+
+      const targetWords = targetClean.split(' ').filter(w => w.length >= 3);
+
+      for (let item of driversList) {
+        if (targetClean === item.cleanName || targetClean.includes(item.cleanName) || item.cleanName.includes(targetClean)) {
+          return item.almacen;
         }
       }
-    });
+
+      let bestMatch = null;
+      let maxScore = 0;
+
+      for (let item of driversList) {
+        const itemWords = item.cleanName.split(' ').filter(w => w.length >= 3);
+        let score = 0;
+
+        targetWords.forEach(tw => {
+          itemWords.forEach(iw => {
+            if (tw === iw) score += 3;
+            else if (tw.startsWith(iw) || iw.startsWith(tw)) score += 2;
+          });
+        });
+
+        if (score > maxScore) {
+          maxScore = score;
+          bestMatch = item.almacen;
+        }
+      }
+
+      if (maxScore >= 2 && bestMatch) {
+        return bestMatch;
+      }
+
+      return 'PENDIENTE DE ASIGNAR';
+    }
+
+    async function loadAllData() {
+      try {
+        const urlGuias = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=Guias`;
+        const urlDrivers = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=DRIVERS`;
+
+        const [resGuias, resDrivers] = await Promise.all([
+          fetch(urlGuias).then(r => r.text()),
+          fetch(urlDrivers).then(r => r.text())
+        ]);
+
+        const rowsGuias = parseCSV(resGuias);
+        const rowsDrivers = parseCSV(resDrivers);
+
+        const driversList = [];
+        rowsDrivers.forEach((row) => {
+          let driverName = '';
+          let almacenName = '';
+
+          row.forEach(cell => {
+            const cellClean = cleanText(cell);
+            if (cellClean.includes('toreo')) almacenName = 'TOREO';
+            else if (cellClean.includes('sur')) almacenName = 'SUR';
+            else if (cell.trim().length > 3 && !cellClean.includes('drivers no auditados') && !cellClean.includes('almacen')) {
+              driverName = cell.trim();
+            }
+          });
+
+          if (driverName && almacenName) {
+            driversList.push({
+              rawName: driverName,
+              cleanName: cleanText(driverName),
+              almacen: almacenName
+            });
+          }
+        });
+
+        mergedIncidents = [];
+
+        rowsGuias.forEach((row, rowIndex) => {
+          // Omitir fila de encabezados
+          if (rowIndex === 0) return;
+
+          // Mapeo directo por posición de columna:
+          // A (0) = Guía | B (1) = Driver | C (2) = Fecha | D (3) = Tipo de incidencia
+          const guia = row[0] ? row[0].trim() : '';
+          const driverRaw = row[1] ? row[1].trim() : 'Sin Asignar';
+          const fecha = row[2] ? row[2].trim() : 'N/A';
+          const tipoFinal = row[3] ? row[3].trim() : 'Sin Clasificar';
+
+          const isTrash = cleanText(guia).includes('guia') || 
+                          cleanText(guia).includes('mensaje whatsapp') || 
+                          cleanText(guia).includes('criterios fallidos') ||
+                          guia.length > 30;
+
+          if (guia && !isTrash) {
+            const almacenFinal = matchDriverAlmacen(driverRaw, driversList);
+
+            mergedIncidents.push({ 
+              guia, 
+              driver: driverRaw || 'Sin Asignar', 
+              fecha, 
+              tipo: tipoFinal || 'Sin Clasificar', 
+              almacen: almacenFinal 
+            });
+          }
+        });
+
+        if (mergedIncidents.length === 0) {
+          showError('No se encontraron guías válidas en la hoja de cálculo.');
+          return;
+        }
+
+        document.getElementById('statusKpi').className = 'text-sm font-bold font-tech text-emerald-400 mt-3';
+        document.getElementById('statusKpi').textContent = '● ONLINE (SINCRO OK)';
+
+        populateDropdowns();
+        renderTable(mergedIncidents);
+        updateKPIs(mergedIncidents);
+        updateCharts();
+
+      } catch (err) {
+        console.error(err);
+        showError('Error al sincronizar datos.');
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('guiasTableBody').innerHTML = `
+        <tr><td colspan="5" class="py-8 text-center text-red-400 bg-red-950/20">${msg}</td></tr>`;
+      document.getElementById('statusKpi').className = 'text-sm font-bold font-tech text-red-400 mt-3';
+      document.getElementById('statusKpi').textContent = '● FALLA DE CONEXIÓN';
+    }
+
+    function renderTable(items) {
+      const tbody = document.getElementById('guiasTableBody');
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No se encontraron resultados.</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      items.forEach((item) => {
+        const isPendiente = item.almacen === 'PENDIENTE DE ASIGNAR';
+        const isToreo = item.almacen === 'TOREO';
+        const badgeClass = isPendiente 
+          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' 
+          : isToreo
+          ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
+          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+
+        const isSoloUna = cleanText(item.tipo).includes('solo 1');
+        const tipoBadgeClass = isSoloUna
+          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+          : 'bg-red-500/10 text-red-400 border-red-500/30';
+
+        html += `
+          <tr class="hover:bg-slate-800/50 transition-colors">
+            <td class="py-3.5 px-5 font-mono font-bold text-white flex items-center gap-2">
+              <span class="text-slate-600 font-normal">#</span>${item.guia}
+            </td>
+            <td class="py-3.5 px-5 font-medium text-slate-200">
+              <span class="inline-block w-2 h-2 rounded-full bg-slate-700 mr-2"></span>${item.driver}
+            </td>
+            <td class="py-3.5 px-5">
+              <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold font-tech uppercase tracking-wider border ${badgeClass}">
+                📍 ${item.almacen}
+              </span>
+            </td>
+            <td class="py-3.5 px-5">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold border ${tipoBadgeClass}">
+                ⚠️ ${item.tipo}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 text-right font-mono text-slate-400 text-[11px]">
+              ${item.fecha}
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function updateCharts() {
+      if (mergedIncidents.length === 0) return;
+
+      const palette = colorPalettes[currentTheme].colors;
+
+      const almacenCounts = {};
+      mergedIncidents.forEach(i => {
+        almacenCounts[i.almacen] = (almacenCounts[i.almacen] || 0) + 1;
+      });
+
+      if (chartAlmacenInstance) chartAlmacenInstance.destroy();
+      const ctx1 = document.getElementById('chartAlmacen').getContext('2d');
+      chartAlmacenInstance = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(almacenCounts),
+          datasets: [{
+            data: Object.values(almacenCounts),
+            backgroundColor: palette,
+            borderWidth: 2,
+            borderColor: '#05070a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 11 } }
+            }
+          }
+        }
+      });
+
+      const tipoCounts = {};
+      mergedIncidents.forEach(i => {
+        tipoCounts[i.tipo] = (tipoCounts[i.tipo] || 0) + 1;
+      });
+
+      if (chartTipoInstance) chartTipoInstance.destroy();
+      const ctx2 = document.getElementById('chartTipo').getContext('2d');
+      chartTipoInstance = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(tipoCounts),
+          datasets: [{
+            data: Object.values(tipoCounts),
+            backgroundColor: palette.slice().reverse(),
+            borderWidth: 2,
+            borderColor: '#05070a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    function populateDropdowns() {
+      const almacenes = [...new Set(mergedIncidents.map(i => i.almacen))].filter(Boolean);
+      const selectAlmacen = document.getElementById('almacenFilter');
+      selectAlmacen.innerHTML = '<option value="">Todos los Almacenes</option>';
+      almacenes.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        selectAlmacen.appendChild(opt);
+      });
+
+      const tipos = [...new Set(mergedIncidents.map(i => i.tipo))].filter(Boolean);
+      const selectTipo = document.getElementById('tipoFilter');
+      selectTipo.innerHTML = '<option value="">Todas las Incidencias</option>';
+      tipos.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        selectTipo.appendChild(opt);
+      });
+    }
+
+    function filterData() {
+      const query = cleanText(document.getElementById('searchInput').value);
+      const selectedAlmacen = document.getElementById('almacenFilter').value;
+      const selectedTipo = document.getElementById('tipoFilter').value;
+
+      const filtered = mergedIncidents.filter(item => {
+        const matchesQuery = cleanText(item.guia).includes(query) || 
+                             cleanText(item.driver).includes(query);
+        const matchesAlmacen = !selectedAlmacen || item.almacen === selectedAlmacen;
+        const matchesTipo = !selectedTipo || item.tipo === selectedTipo;
+        return matchesQuery && matchesAlmacen && matchesTipo;
+      });
+
+      renderTable(filtered);
+      updateKPIs(filtered);
+    }
+
+    function updateKPIs(items) {
+      document.getElementById('totalKpi').textContent = items.length;
+      const uniqueDrivers = new Set(items.map(i => i.driver)).size;
+      document.getElementById('driversKpi').textContent = uniqueDrivers;
+    }
+
+    loadAllData();
   </script>
 </body>
 </html>
