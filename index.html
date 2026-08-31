@@ -76,8 +76,11 @@
           <button onclick="changeTheme('purple')" class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 border-2 border-white/20 hover:scale-125 transition-transform" title="Deep Purple"></button>
         </div>
 
-        <input type="text" id="searchInput" oninput="filterData()" placeholder="🔍 Buscar guía o driver..." 
-               class="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 w-full sm:w-44">
+        <div class="relative w-full sm:w-52">
+          <input type="text" id="searchInput" oninput="onSearchInput()" placeholder="🔍 Buscar guía o driver..." 
+                 class="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 w-full pr-7">
+          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold">✕</button>
+        </div>
         
         <select id="almacenFilter" onchange="filterData()" 
                 class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none">
@@ -151,14 +154,16 @@
         </div>
       </div>
 
-      <!-- APARTADO NUEVO: TOP 5 DRIVERS -->
+      <!-- APARTADO TOP 5 DRIVERS CON EVENTO CLICK -->
       <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl relative flex flex-col justify-between">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-300 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
             Top 5 Drivers Críticos
           </h3>
-          <span class="text-xs text-slate-500 font-tech">MÁS REPORTADOS</span>
+          <span class="text-[10px] text-slate-400 font-tech bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">
+            🖱️ HAZ CLIC PARA FILTRAR
+          </span>
         </div>
         
         <div id="topDriversContainer" class="space-y-3.5 my-auto">
@@ -173,6 +178,10 @@
         <h3 class="text-sm font-bold font-tech tracking-wider uppercase text-slate-200 flex items-center gap-2">
           <span>🏷️</span> Registro Clasificado de Incidencias
         </h3>
+        <span id="activeFilterBadge" class="hidden text-xs font-tech bg-red-500/10 text-red-400 border border-red-500/30 px-3 py-1 rounded-full flex items-center gap-2">
+          <span>Filtro activo: <strong id="selectedDriverName"></strong></span>
+          <button onclick="clearSearch()" class="hover:text-white font-bold ml-1">✕</button>
+        </span>
       </div>
 
       <div class="overflow-x-auto">
@@ -202,6 +211,7 @@
     let mergedIncidents = [];
     let chartAlmacenInstance = null;
     let chartTipoInstance = null;
+    let selectedDriverFilter = '';
 
     const colorPalettes = {
       warm: { primary: '#ff0055', secondary: '#ffaa00', colors: ['#ff0055', '#ffaa00', '#ccff00', '#ff3300', '#ff00aa', '#ffdd00'] },
@@ -384,7 +394,7 @@
       const container = document.getElementById('topDriversContainer');
       
       const counts = {};
-      items.forEach(i => {
+      mergedIncidents.forEach(i => {
         if (i.driver && i.driver !== 'Sin Asignar') {
           counts[i.driver] = (counts[i.driver] || 0) + 1;
         }
@@ -405,28 +415,36 @@
 
       top5.forEach((item, index) => {
         const percentage = Math.round((item.count / maxCount) * 100);
+        const isSelected = selectedDriverFilter === item.driver;
         
         let badgeColor = 'bg-slate-800 text-slate-400 border-slate-700';
         if (index === 0) badgeColor = 'bg-red-500/20 text-red-400 border-red-500/40 font-bold';
         else if (index === 1) badgeColor = 'bg-amber-500/20 text-amber-400 border-amber-500/40';
         else if (index === 2) badgeColor = 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
 
+        const activeItemStyle = isSelected 
+          ? 'bg-slate-800/90 border-amber-500/60 shadow-lg scale-[1.02]' 
+          : 'hover:bg-slate-800/40 border-transparent hover:border-slate-800';
+
         html += `
-          <div class="space-y-1.5">
+          <div onclick="selectDriverFilter('${item.driver.replace(/'/g, "\\'")}')" 
+               class="p-2 rounded-xl border transition-all cursor-pointer group ${activeItemStyle}">
             <div class="flex justify-between items-center text-xs">
               <div class="flex items-center gap-2 truncate max-w-[70%]">
                 <span class="w-5 h-5 rounded-full border flex items-center justify-center text-[10px] font-tech font-bold ${badgeColor}">
                   #${index + 1}
                 </span>
-                <span class="font-medium text-slate-200 truncate">${item.driver}</span>
+                <span class="font-medium ${isSelected ? 'text-amber-400 font-bold' : 'text-slate-200'} truncate group-hover:text-white transition-colors">
+                  ${item.driver}
+                </span>
               </div>
               <span class="font-tech font-bold text-slate-300 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800 text-[11px]">
                 ${item.count} ${item.count === 1 ? 'incidencia' : 'incidencias'}
               </span>
             </div>
-            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800/60">
+            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800/60 mt-1.5">
               <div class="h-full rounded-full transition-all duration-500" 
-                   style="width: ${percentage}%; background-color: var(--neon-primary)">
+                   style="width: ${percentage}%; background-color: ${isSelected ? '#f59e0b' : 'var(--neon-primary)'}">
               </div>
             </div>
           </div>
@@ -434,6 +452,48 @@
       });
 
       container.innerHTML = html;
+    }
+
+    function selectDriverFilter(driverName) {
+      if (selectedDriverFilter === driverName) {
+        clearSearch();
+      } else {
+        selectedDriverFilter = driverName;
+        document.getElementById('searchInput').value = driverName;
+        document.getElementById('clearSearchBtn').classList.remove('hidden');
+        
+        document.getElementById('selectedDriverName').textContent = driverName;
+        document.getElementById('activeFilterBadge').classList.remove('hidden');
+        document.getElementById('activeFilterBadge').classList.add('flex');
+        
+        filterData();
+      }
+    }
+
+    function onSearchInput() {
+      const value = document.getElementById('searchInput').value;
+      if (value !== selectedDriverFilter) {
+        selectedDriverFilter = '';
+        document.getElementById('activeFilterBadge').classList.add('hidden');
+        document.getElementById('activeFilterBadge').classList.remove('flex');
+      }
+      
+      if (value.trim() !== '') {
+        document.getElementById('clearSearchBtn').classList.remove('hidden');
+      } else {
+        document.getElementById('clearSearchBtn').classList.add('hidden');
+      }
+      
+      filterData();
+    }
+
+    function clearSearch() {
+      selectedDriverFilter = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      document.getElementById('activeFilterBadge').classList.add('hidden');
+      document.getElementById('activeFilterBadge').classList.remove('flex');
+      filterData();
     }
 
     function showError(msg) {
@@ -596,7 +656,7 @@
 
       renderTable(filtered);
       updateKPIs(filtered);
-      updateTopDrivers(filtered);
+      updateTopDrivers(mergedIncidents);
     }
 
     function updateKPIs(items) {
