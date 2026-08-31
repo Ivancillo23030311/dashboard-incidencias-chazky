@@ -1,56 +1,55 @@
-<!-- KPIS MEJORADOS CON RANKING Y PORCENTAJES DE DRIVERS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 20px 0; font-family: system-ui, -apple-system, sans-serif;">
 
-      <!-- KPI 1: PEOR DRIVER (TOP 1) -->
-      <div class="bg-slate-900/80 border border-red-500/30 p-5 rounded-2xl relative overflow-hidden group hover:border-red-500/60 transition-all glow-box">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-red-400 font-tech uppercase tracking-wider">🚨 Peor Driver (Top 1)</span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/30">REINCIDENTE</span>
-        </div>
-        <div id="kpiWorstDriverName" class="text-2xl font-extrabold font-tech text-white mt-3 truncate">
-          Luis Angel Luna
-        </div>
-        <p id="kpiWorstDriverCount" class="text-xs text-slate-400 mt-1">
-          <span class="text-red-400 font-bold">13</span> incidencias registradas
-        </p>
-      </div>
-
-      <!-- KPI 2: PORCENTAJE DE CONCENTRACIÓN -->
-      <div class="bg-slate-900/80 border border-amber-500/30 p-5 rounded-2xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-amber-400 font-tech uppercase tracking-wider">📈 Concentración Impacto</span>
-          <span class="text-xl">⚠️</span>
-        </div>
-        <div id="kpiConcentrationRate" class="text-4xl font-extrabold font-tech text-amber-400 mt-2">
-          100%
-        </div>
-        <p class="text-[10px] text-slate-500 mt-1">Acumuladas en 1 solo repartidor</p>
-      </div>
-
-      <!-- KPI 3: TIPO DE FALLA PREDOMINANTE -->
-      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">⚙️ Incidencia Principal</span>
-          <span class="text-xl">📄</span>
-        </div>
-        <div id="kpiTopFalla" class="text-lg font-bold font-tech text-slate-200 mt-3 truncate">
-          Terceros sin evidencia
-        </div>
-        <p id="kpiTopFallaDetail" class="text-[10px] text-slate-400 mt-1">
-          84.6% del total (11 casos)
-        </p>
-      </div>
-
-      <!-- KPI 4: EVIDENCIA INCOMPLETA -->
-      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-slate-400 font-tech uppercase tracking-wider">🔍 Evidencia Incompleta</span>
-          <span class="text-xl">📷</span>
-        </div>
-        <div id="kpiSecondFalla" class="text-4xl font-extrabold font-tech text-purple-400 mt-2">
-          15.4%
-        </div>
-        <p class="text-[10px] text-slate-500 mt-1">Solo 1 evidencia cargada (2 casos)</p>
-      </div>
-
+  <!-- KPI 1: PEOR DRIVER -->
+  <div style="background-color: #0f172a; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 20px; color: #ffffff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span style="font-size: 11px; font-weight: 700; color: #f87171; text-transform: uppercase; letter-spacing: 0.5px;">🚨 Peor Driver (Top 1)</span>
+      <span style="font-size: 9px; font-weight: 800; background-color: rgba(239, 68, 68, 0.2); color: #f87171; padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.4);">REINCIDENTE</span>
     </div>
+    <div id="kpiWorstDriverName" style="font-size: 22px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      Luis Angel Luna
+    </div>
+    <p id="kpiWorstDriverCount" style="font-size: 13px; color: #94a3b8; margin-top: 6px;">
+      <span style="color: #f87171; font-weight: 700;">13</span> incidencias registradas
+    </p>
+  </div>
+
+  <!-- KPI 2: CONCENTRACIÓN -->
+  <div style="background-color: #0f172a; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 16px; padding: 20px; color: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px;">📈 Concentración Impacto</span>
+      <span style="font-size: 16px;">⚠️</span>
+    </div>
+    <div id="kpiConcentrationRate" style="font-size: 32px; font-weight: 800; color: #fbbf24; margin-top: 4px;">
+      100%
+    </div>
+    <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Acumuladas en 1 solo repartidor</p>
+  </div>
+
+  <!-- KPI 3: INCIDENCIA PRINCIPAL -->
+  <div style="background-color: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 20px; color: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">⚙️ Incidencia Principal</span>
+      <span style="font-size: 16px;">📄</span>
+    </div>
+    <div id="kpiTopFalla" style="font-size: 17px; font-weight: 700; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      Terceros sin evidencia
+    </div>
+    <p id="kpiTopFallaDetail" style="font-size: 12px; color: #94a3b8; margin-top: 6px;">
+      84.6% del total (11 casos)
+    </p>
+  </div>
+
+  <!-- KPI 4: EVIDENCIA INCOMPLETA -->
+  <div style="background-color: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 20px; color: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">🔍 Evidencia Incompleta</span>
+      <span style="font-size: 16px;">📷</span>
+    </div>
+    <div id="kpiSecondFalla" style="font-size: 32px; font-weight: 800; color: #c084fc; margin-top: 4px;">
+      15.4%
+    </div>
+    <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Solo 1 evidencia cargada (2 casos)</p>
+  </div>
+
+</div>
